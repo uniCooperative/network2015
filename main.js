@@ -24,34 +24,22 @@ webrtc.on('createdPeer', function (client) {
 });
 
 
-  var fileinput = document.getElementById('input');
-  console.log(fileinput);
-  fileinput.type = 'file';
-  fileinput.disabled = false;
+var input = document.getElementById('input');
 
- function doStuff(peer){
-  // receiving an incoming filetransfer
-  peer.on('fileTransfer', function (metadata, receiver) {
-    console.log('incoming filetransfer', metadata.name, metadata);
-    receiver.on('progress', function (bytesReceived) {
-      console.log('receive progress', bytesReceived, 'out of', metadata.size);
-    });
-    // get notified when file is done
-    receiver.on('receivedFile', function (file, metadata) {
-      console.log('received file', metadata.name, metadata.size);
-
-      // close the channel
-      receiver.channel.close();
-    });
-    filelist.appendChild(item);
+function doStuff(peer){
+  peer.on('channelMessage', function (peer, channel, msg) {
+    //console.log(peer, channel, msg);
+    if(msg)
+    console.log(msg.payload.data);
   });
 
+  var channel = peer.getDataChannel("message", {reliable: false});
 
-
-  fileinput.addEventListener('change', function() {
-    fileinput.disabled = true;
-
-    var file = fileinput.files[0];
-    var sender = peer.sendFile(file);
+  channel.onopen = function(data){
+  input.addEventListener('input', function() {
+      var res = peer.sendDirectly("message", "json", {data: input.value});
+    if(res)
+      console.log("Data send");
   });
-  }
+  };
+}
