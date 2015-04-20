@@ -59,6 +59,7 @@ function updateUser(){
 	if (name === "")
 		name = "Guest";
 	sendAll({msg: "Hi, I changed my name to" + name, job: "associate", name: name});
+	document.getElementById("nickname").innerHTML = name;
 }
 
 
