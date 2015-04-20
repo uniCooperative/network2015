@@ -15,7 +15,7 @@ var webrtc = new SimpleWebRTC({
 
 var positions = [];
 var players = [];
-var rooms = [];
+var rooms = {};
 
 // join without waiting for media
 webrtc.joinRoom('Lobby225346');
@@ -39,6 +39,7 @@ webrtc.on('createdPeer', function (peer) {
 
 	peer.name = "Guest";
 	updateUser();
+  //updateRoom();
 	printPlayer();
 });
 
@@ -57,8 +58,10 @@ function printPlayer(){
 function printRoom(){
 	var div = document.getElementById("roomList");
 	div.innerHTML = "";
-	for (var i = 0; i < rooms.length; i++){
-		div.innerHTML += rooms[i] + "</p>";
+  console.log(rooms);
+	for (el in rooms){
+    console.log(el);
+		div.innerHTML += el + "</p>";
 	}
 }
 
@@ -73,7 +76,7 @@ function updateUser(){
 
 function updateRoom(){
   var room = document.getElementById("room").value;
-	if (room !== ""){
+	if (room != "" && room != undefined){
 	  sendAll({msg: "I created the room " + room, job: "createRoom", room: room});
   }
 }
@@ -121,9 +124,12 @@ function doStuff(peer, data){
     case "associate":
 			peer.name = data.name;
 			printPlayer();
+      break;
     case "createRoom":
-      rooms.push(data.room);
+      console.log("Rooms added", data.room);
+      rooms[data.room] = true;
       printRoom();
+      break;
 		default:
 			console.log(data);
 	}
