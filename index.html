@@ -4,6 +4,7 @@
 	</head>
 	<body>
 		<div>Peers</div>
+		<div id="peers"></div>
 		<div>
 			<label>Username:</label>
 			<input onchange="updateUser()" id="username"></input>
@@ -12,7 +13,13 @@
 		<div id="nickname">
 			
 		</div>
-		<div id="peers"></div>
+		
+		<div id="room">
+			<label>Room</label>
+		<div id="roomList"></div>
+			<input onchange="updateRoom()" id="room"></input>
+			<button onclick="updateRoom()">OK</button>
+		</div>
 		<script src="simplewebrtc.bundle.js"></script>
 		<script src="mainLobby.js"></script>
 	</body>
