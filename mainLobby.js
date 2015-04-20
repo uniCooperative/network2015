@@ -121,7 +121,7 @@ function doStuff(peer, data){
     case "associate":
 			peer.name = data.name;
 			printPlayer();
-		case "createRoom"
+    case "createRoom":
       rooms.push(data.room);
       printRoom();
 		default:
