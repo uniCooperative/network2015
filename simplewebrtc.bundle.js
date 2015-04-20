@@ -11,7 +11,7 @@ function SimpleWebRTC(opts) {
     var self = this;
     var options = opts || {};
     var config = this.config = {
-            url: 'https://signaling.simplewebrtc.com:443/',
+            url: 'stun.l.google.com:19302',
             socketio: {/* 'force new connection':true*/},
             connection: null,
             debug: false,

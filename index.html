@@ -2,13 +2,15 @@
 <html>
 	<head>
 	</head>
-	<body onload="init();">
+	<body>
 		<div>Peers</div>
+		<div>
+			<label>Username:</label>
+			<input id="username"></input>
+			<button onclick="updateUser()">OK</button>
+		</div>
 		<div id="peers"></div>
-		<canvas id="demoCanvas" width="500" height="300"></canvas>
 		<script src="simplewebrtc.bundle.js"></script>
-		<script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
-		<script src="https://code.createjs.com/tweenjs-0.6.0.min.js"></script>
-		<script src="main.js"></script>
+		<script src="mainLobby.js"></script>
 	</body>
 </html>
