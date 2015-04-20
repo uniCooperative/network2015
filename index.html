@@ -13,6 +13,11 @@
 			
 		</div>
 		<div id="peers"></div>
+		<div id="room">
+			<label>Room</label>
+			<input onchange="updateRoom()" id="room"></input>
+			<button onclick="updateRoom()">OK</button>
+		</div>
 		<script src="simplewebrtc.bundle.js"></script>
 		<script src="mainLobby.js"></script>
 	</body>
