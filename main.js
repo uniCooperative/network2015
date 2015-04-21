@@ -138,6 +138,7 @@ var stage;
 
 //createjs
 function init() {
+
 }
 
 function addPlayer(id) {
