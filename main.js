@@ -1,3 +1,4 @@
+var PADDLE_LENGHT = 100;
 var webrtc = new SimpleWebRTC({
 	// we don't do video
 	localVideoEl: '',
@@ -108,7 +109,7 @@ function sortPlayer(){
 	stage = new createjs.Stage("demoCanvas");
 	for(var i = 0; i < players.length; i++){
 		players[i].element = addPlayer(players[i].id);
-		players[i].horizontal = (i % 2 == 0)? true: false;
+		players[i].vertical = (i % 2 == 0)? true: false;
 	}
 	stage.update();
 }
@@ -146,10 +147,10 @@ function addPlayer(id) {
 	player = new createjs.Shape();
 	var pos = findNextPostion();
 	if (pos) {
-		if (pos.horizontal === true)
-			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, 100, 10, 5, 5, 5, 5);
+		if (pos.vertical === true)
+			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, PADDLE_LENGHT, 10, 0, 0, 0, 0);
 		else
-			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, 10, 100, 5, 5, 5, 5);
+			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, 10, PADDLE_LENGHT, 0, 0, 0, 0);
 		player.x = pos.x;
 		player.y = pos.y;
 		stage.addChild(player);
@@ -163,21 +164,22 @@ function findNextPostion() {
 		var x, y;
 		var width = stage.canvas.width;
 		var height = stage.canvas.height;
-		var horizontal = false;
+		var vertical = false;
 
 		switch (nextPos) {
-			case 0: x = 10; y = height/2;	break;
-			case 1: x = width/2; y = 10; horizontal = true;	break;
-			case 2: x = width - 10; y = height/2;	break;
-			case 3: x = width/2; y = height - 10;	horizontal = true; break;
+			case 0: x = 0; y = height/2 - PADDLE_LENGHT/2;	break;
+			case 1: x = width/2 - PADDLE_LENGHT/2; y = 0; vertical = true;	break;
+			case 2: x = width - 10; y = height/2 - PADDLE_LENGHT/2;	break;
+			case 3: x = width/2 - PADDLE_LENGHT/2; y = height - 10;	vertical = true; break;
 		}
-		return {x: x, y: y, horizontal: horizontal};
+		return {x: x, y: y, vertical: vertical};
 	}
 	return undefined;
 }
 
 function movePaddle(peerId, direction){
 	var step;
+	var peer = findPaddleToMove(peerId);
 	switch (direction){
 		case "up":
 			step = -2;
@@ -187,10 +189,14 @@ function movePaddle(peerId, direction){
 			break;
 	}
 	//if (y < 0) y = stage.canvas.height % stage.canvas.height;
-	if(findPaddleToMove(peerId).horizontal)
-		findPaddleToMove(peerId).element.y += step;
-	else
-		findPaddleToMove(peerId).element.x += step;
+	if(peer.vertical) {
+		if(peer.element.y + step > 0 && peer.element.y + step + PADDLE_LENGHT < stage.canvas.height) 
+			peer.element.y += step;
+	}
+	else {
+		if(peer.element.x + step > 0 && peer.element.x + step + PADDLE_LENGHT < stage.canvas.width) 
+			peer.element.x += step;
+	}
 	stage.update();
 }
 
