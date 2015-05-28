@@ -132,7 +132,7 @@ function doStuff(peer, data){
 			break;
 		case "move":
 			//console.log(data);
-			movePaddle(peer.id, data.direction);
+			repositionPaddle(peer.id, data.position);
 			break;
 		default:
 			console.log(data);
@@ -276,6 +276,11 @@ function findNextPostion() {
 	}
 	return undefined;
 }
+function repositionPaddle(peerId, position) {
+	var peer = findPaddleToMove(peerId);
+			peer.element.x = position.x;
+			peer.element.y = position.y;
+}
 
 function movePaddle(peerId, direction){
 	var step;
@@ -298,6 +303,7 @@ function movePaddle(peerId, direction){
 			peer.element.x += step;
 	}
 	stage.update();
+	return {x: peer.element.x, y: peer.element.y}
 }
 
 function findPaddleToMove(peerId){
@@ -314,15 +320,13 @@ document.onkeydown = function(e){
 	switch (e.keyCode){
 		//up arrow
 		case 38: 
-			direction = "up"
-				sendAll({msg: "Please move my paddle", job: "move", direction: direction});
-			movePaddle(myId, direction);
+				direction = "up"
+				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
 			break;
 			//down arrow
 		case 40: 
-			direction = "down"
-				sendAll({msg: "Please move my paddle", job: "move", direction: direction});
-			movePaddle(myId, direction);
+				direction = "down"
+				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
 			break;
 	}
 }
