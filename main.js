@@ -1,5 +1,5 @@
 var PADDLE_LENGHT = 100;
-var speedX = 3;
+var speedX = 0;
 var speedY = 3;
 var score = [0, 0, 0, 0];
 
@@ -168,6 +168,12 @@ function gameLoop() {
 	//ball.snapToPixel = false;
 	stage.addChild(ball);
 	//stage.update();
+	 var scoreText = new createjs.Text("0,0,0,0", "30px Arial", "#fff");
+	scoreText.x = stage.canvas.width / 2;
+	scoreText.y = stage.canvas.height / 2;
+	scoreText.textAlign = "center";
+	scoreText.textBaseline = "middle";
+	stage.addChild(scoreText);
 
 	console.log(ball);
 	ball.checkCollision = function(a) {
@@ -175,7 +181,7 @@ function gameLoop() {
 			//vertical check
 			if (b.x - b.width/2 < a.x + a.width/2 && b.y + b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) return true;
 			//horizontal check
-			//if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
+			if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
 			return false;
 }
 	createjs.Ticker.setFPS(30);
@@ -199,31 +205,35 @@ function gameLoop() {
 				speedY *= -1;
 			}
 
+			var hitWall = false;
 			//All 4 walls
 			var wall = 10;
 			if (ball.x + speedX > maxWidth - wall) {
 				score[2]++;
 				speedX *= -1;
-				console.log("Score: ", score);
+				hitWall = true;
 			}
 			if (ball.x + speedX < 0 + wall) {
 				score[0]++;
 				speedX *= -1;
-				console.log("Score: ", score);
+				hitWall = true;
 			}
  			if (ball.y + speedY > maxHeight - wall) {
 				score[1]++;
 				speedY *= -1;
-				console.log("Score: ", score);
+				hitWall = true;
 			}
 			if (ball.y + speedY < 0 + wall) {
 				score[3]++;
 				speedY *= -1;
-				console.log("Score: ", score);
+				hitWall = true;
 			}
 
-			ball.x += speedX;
-			ball.y += speedY;
+			if(hitWall) {
+				scoreText.text = score;
+			}
+				ball.x += speedX;
+				ball.y += speedY;
 			stage.update();
 		}
 
