@@ -1,11 +1,14 @@
 var PADDLE_LENGHT = 100;
+var speedX = 3;
+var speedY = 3;
+
 var webrtc = new SimpleWebRTC({
 	// we don't do video
 	localVideoEl: '',
 	remoteVideosEl: '',
-		// dont ask for camera access
+	// dont ask for camera access
 	autoRequestMedia: false,
-		// dont negotiate media
+	// dont negotiate media
 	receiveMedia: {
 		mandatory: {
 			OfferToReceiveAudio: false,
@@ -44,7 +47,7 @@ webrtc.on('createdPeer', function (peer) {
 	//stage.update();
 	if(allPeers.length === 3){
 		console.log("Ready to play");
-		startGame();
+		initGame();
 	}
 
 	div.innerHTML = "";
@@ -66,7 +69,7 @@ function sendPeer(peer, data){
 
 	var isOpen = peer.sendDirectly("message", "json", data);
 	if(isOpen){}
-		//console.log("Data send");
+	//console.log("Data send");
 	else{
 		//retry when channel is open
 		var saveOldOnopen = channel.onopen;
@@ -86,7 +89,7 @@ function sendAll(data){
 	}
 }
 
-function startGame(){
+function initGame(){
 	players = [];
 	choosePositon();
 }
@@ -99,27 +102,32 @@ function choosePositon(){
 	console.log(rnd);
 }
 
-function sortPlayer(){
+function sortPlacePlayer(){
+	//Sort Player list
 	console.log(players);
 	players.sort(function (a, b) {
 		if (a.rnd < b.rnd) return -1;
 		if (a.rnd > b.rnd) return 1;
 		if (a.rnd === b.rnd) return 0;
 	});
-	stage = new createjs.Stage("demoCanvas");
+	//Place player
 	for(var i = 0; i < players.length; i++){
 		players[i].element = addPlayer(players[i].id);
 		players[i].vertical = (i % 2 == 0)? true: false;
 	}
 	stage.update();
+
 }
 
 function doStuff(peer, data){
 	switch (data.job) {
 		case "posInit":
 			players.push({id: peer.id, rnd: data.rnd});
-			if(players.length === 4)
-				sortPlayer();
+			if(players.length === 4 && !stage) {
+				stage = new createjs.Stage("demoCanvas");
+				sortPlacePlayer();
+				startGame();
+			}
 			break;
 		case "move":
 			//console.log(data);
@@ -142,21 +150,110 @@ function init() {
 
 }
 
+function startGame() {
+	console.log("Start Game");
+	//litle delay before game start
+	window.setTimeout(function() {
+		gameLoop();
+	}, 100);
+}
+
+function gameLoop() {
+	var ball = new createjs.Shape();
+	ball.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
+	ball.x = stage.canvas.width / 2;
+	ball.y = stage.canvas.height / 2;
+	//ball.snapToPixel = false;
+	stage.addChild(ball);
+	stage.update();
+
+	console.log(ball);
+	ball.checkCollision = function(a) {
+			var b = {x: this.x, y: this.y, width: 20, height: 20};
+			//console.log("Check for collision");
+			//console.log(rect1);
+			//console.log(rect2);
+	    //if ( rect1.x >= rect2.x + rect2.width || rect1.x + rect1.width <= rect2.x || rect1.y >= rect2.y + rect2.height || rect1.y + rect1.height <= rect2.y ) return false;
+			//console.log(b.x - b.width/2, a.x + a.width/2);
+			//console.log(a.width, a.height);
+			//vertical check
+			if (b.x - b.width/2 < a.x + a.width/2 && b.y + b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) return true;
+			//horizontal check
+			if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
+
+			//console.log(a.x);
+			//console.log((b.x - b.width/2) + " / " +  (a.x + a.width/2) + " : " + 
+			//(b.y - b.height/2) + " / " +  (a.y + a.height/2));
+			return false;
+}
+	createjs.Ticker.setFPS(30);
+	
+	createjs.Ticker.addEventListener("tick", handleTick);
+	function handleTick(event) {
+		// Actions carried out each tick (aka frame)
+		if (!event.paused) {
+			// Actions carried out when the Ticker is not paused.
+			var maxWidth = stage.canvas.width;
+			var maxHeight = stage.canvas.height;
+			//console.log(ball.x, ball.y)
+			//collision detection
+			for (var i = 0; i < stage.children.length && !collision; i++) {
+				if(stage.children[i].playerId)
+				var collision = ball.checkCollision(stage.children[i]);
+			}
+			if (collision) {
+				console.log("collision");
+				speedX *= -1;
+				speedY *= -1;
+			}
+
+			//All 4 walls
+			var wall = 10;
+			if (ball.x + speedX > maxWidth - wall)
+				speedX *= -1;
+			if (ball.x + speedX < 0 + wall)
+				speedX *= -1;
+ 			if (ball.y + speedY > maxHeight - wall)
+				speedY *= -1;
+			if (ball.y + speedY < 0 + wall)
+				speedY *= -1;
+
+			ball.x += speedX;
+			ball.y += speedY;
+			stage.update();
+		}
+
+	}
+}
+
+function checkState() {
+	console.log("Hello");
+}
+
 function addPlayer(id) {
 	console.log("Add player " + id);
 	player = new createjs.Shape();
 	var pos = findNextPostion();
 	if (pos) {
-		if (pos.vertical === true)
-			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, PADDLE_LENGHT, 10, 0, 0, 0, 0);
-		else
-			player.graphics.beginFill("Crimson").drawRoundRect(0, 0, 10, PADDLE_LENGHT, 0, 0, 0, 0);
+		if (pos.vertical === true) {
+			player.graphics.beginFill("DeepSkyBlue").drawRect(-(PADDLE_LENGHT/2), -10/2, PADDLE_LENGHT, 10);
+			player.width = PADDLE_LENGHT;
+			player.height = 10;
+		}
+		else {
+			player.graphics.beginFill("Crimson").drawRect(-10/2, -(PADDLE_LENGHT/2), 10, PADDLE_LENGHT);
+			player.width = 10;
+			player.height = PADDLE_LENGHT;
+		}
+		player.playerId = id;
 		player.x = pos.x;
 		player.y = pos.y;
 		stage.addChild(player);
+		console.log(player.width);
 		return player;
 	}
 }
+
 
 function findNextPostion() {
 	var nextPos = stage.children.length;
@@ -167,10 +264,10 @@ function findNextPostion() {
 		var vertical = false;
 
 		switch (nextPos) {
-			case 0: x = 0; y = height/2 - PADDLE_LENGHT/2;	break;
-			case 1: x = width/2 - PADDLE_LENGHT/2; y = 0; vertical = true;	break;
-			case 2: x = width - 10; y = height/2 - PADDLE_LENGHT/2;	break;
-			case 3: x = width/2 - PADDLE_LENGHT/2; y = height - 10;	vertical = true; break;
+			case 0: x = 5; y = height/2;	break;
+			case 1: x = width/2; y = 5; vertical = true;	break;
+			case 2: x = width - 5; y = height/2;	break;
+			case 3: x = width/2; y = height - 5;	vertical = true; break;
 		}
 		return {x: x, y: y, vertical: vertical};
 	}
@@ -188,13 +285,13 @@ function movePaddle(peerId, direction){
 			step = 2;
 			break;
 	}
-	//if (y < 0) y = stage.canvas.height % stage.canvas.height;
+
 	if(peer.vertical) {
-		if(peer.element.y + step > 0 && peer.element.y + step + PADDLE_LENGHT < stage.canvas.height) 
+		if(peer.element.y + step - PADDLE_LENGHT/2 > 0 && peer.element.y + step + PADDLE_LENGHT/2 < stage.canvas.height) 
 			peer.element.y += step;
 	}
 	else {
-		if(peer.element.x + step > 0 && peer.element.x + step + PADDLE_LENGHT < stage.canvas.width) 
+		if(peer.element.x + step - PADDLE_LENGHT/2 > 0 && peer.element.x + step + PADDLE_LENGHT/2 < stage.canvas.width) 
 			peer.element.x += step;
 	}
 	stage.update();
@@ -215,13 +312,13 @@ document.onkeydown = function(e){
 		//up arrow
 		case 38: 
 			direction = "up"
-			sendAll({msg: "Please move my paddle", job: "move", direction: direction});
+				sendAll({msg: "Please move my paddle", job: "move", direction: direction});
 			movePaddle(myId, direction);
 			break;
 			//down arrow
 		case 40: 
 			direction = "down"
-			sendAll({msg: "Please move my paddle", job: "move", direction: direction});
+				sendAll({msg: "Please move my paddle", job: "move", direction: direction});
 			movePaddle(myId, direction);
 			break;
 	}
