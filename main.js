@@ -33,6 +33,7 @@ webrtc.on('createdPeer', function (peer) {
 	peer.on('channelClose', function (channel, error) {
 		console.log("Losed data channel", channel, error);
 		console.log("Should remove player");
+		location.reload();
 	});
 
 	//handle incoming data
@@ -116,7 +117,7 @@ function sortPlacePlayer(){
 		players[i].element = addPlayer(players[i].id);
 		players[i].vertical = (i % 2 == 0)? true: false;
 	}
-	stage.update();
+	//stage.update();
 
 }
 
@@ -166,7 +167,7 @@ function gameLoop() {
 	ball.y = stage.canvas.height / 2;
 	//ball.snapToPixel = false;
 	stage.addChild(ball);
-	stage.update();
+	//stage.update();
 
 	console.log(ball);
 	ball.checkCollision = function(a) {
@@ -302,7 +303,7 @@ function movePaddle(peerId, direction){
 		if(peer.element.x + step - PADDLE_LENGHT/2 > 0 && peer.element.x + step + PADDLE_LENGHT/2 < stage.canvas.width) 
 			peer.element.x += step;
 	}
-	stage.update();
+	//stage.update();
 	return {x: peer.element.x, y: peer.element.y}
 }
 
