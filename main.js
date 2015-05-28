@@ -1,6 +1,7 @@
 var PADDLE_LENGHT = 100;
 var speedX = 3;
 var speedY = 3;
+var score = [0, 0, 0, 0];
 
 var webrtc = new SimpleWebRTC({
 	// we don't do video
@@ -170,20 +171,10 @@ function gameLoop() {
 	console.log(ball);
 	ball.checkCollision = function(a) {
 			var b = {x: this.x, y: this.y, width: 20, height: 20};
-			//console.log("Check for collision");
-			//console.log(rect1);
-			//console.log(rect2);
-	    //if ( rect1.x >= rect2.x + rect2.width || rect1.x + rect1.width <= rect2.x || rect1.y >= rect2.y + rect2.height || rect1.y + rect1.height <= rect2.y ) return false;
-			//console.log(b.x - b.width/2, a.x + a.width/2);
-			//console.log(a.width, a.height);
 			//vertical check
 			if (b.x - b.width/2 < a.x + a.width/2 && b.y + b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) return true;
 			//horizontal check
-			if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
-
-			//console.log(a.x);
-			//console.log((b.x - b.width/2) + " / " +  (a.x + a.width/2) + " : " + 
-			//(b.y - b.height/2) + " / " +  (a.y + a.height/2));
+			//if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
 			return false;
 }
 	createjs.Ticker.setFPS(30);
@@ -209,14 +200,26 @@ function gameLoop() {
 
 			//All 4 walls
 			var wall = 10;
-			if (ball.x + speedX > maxWidth - wall)
+			if (ball.x + speedX > maxWidth - wall) {
+				score[2]++;
 				speedX *= -1;
-			if (ball.x + speedX < 0 + wall)
+				console.log("Score: ", score);
+			}
+			if (ball.x + speedX < 0 + wall) {
+				score[0]++;
 				speedX *= -1;
- 			if (ball.y + speedY > maxHeight - wall)
+				console.log("Score: ", score);
+			}
+ 			if (ball.y + speedY > maxHeight - wall) {
+				score[1]++;
 				speedY *= -1;
-			if (ball.y + speedY < 0 + wall)
+				console.log("Score: ", score);
+			}
+			if (ball.y + speedY < 0 + wall) {
+				score[3]++;
 				speedY *= -1;
+				console.log("Score: ", score);
+			}
 
 			ball.x += speedX;
 			ball.y += speedY;
