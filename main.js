@@ -1,7 +1,14 @@
 var PADDLE_LENGHT = 100;
-var speedX = 5;
+var speedX = -2;
 var speedY = -5;
 var score = [0, 0, 0, 0];
+var player1 = false;
+var players = [];
+var y = 0;
+var stage;
+var master = false;
+var ball;
+var scoreText;
 
 var webrtc = new SimpleWebRTC({
 	// we don't do video
@@ -18,11 +25,9 @@ var webrtc = new SimpleWebRTC({
 	}
 });
 
-var positions = [];
-var players = [];
 
 // join without waiting for media
-webrtc.joinRoom('marco');
+webrtc.joinRoom('julian');
 
 // called when a peer is created
 webrtc.on('createdPeer', function (peer) {
@@ -112,12 +117,18 @@ function sortPlacePlayer(){
 		if (a.rnd > b.rnd) return 1;
 		if (a.rnd === b.rnd) return 0;
 	});
+	for(var i = 1; i < players.length; i++) {
+		if (players[i].rnd === players[i-1].rnd)
+			return false;
+ }
 	//Place player
 	for(var i = 0; i < players.length; i++){
+		//add Paddle
 		players[i].element = addPlayer(players[i].id);
 		players[i].vertical = (i % 2 == 0)? true: false;
 	}
 	//stage.update();
+	return true;
 
 }
 
@@ -127,13 +138,20 @@ function doStuff(peer, data){
 			players.push({id: peer.id, rnd: data.rnd});
 			if(players.length === 4 && !stage) {
 				stage = new createjs.Stage("demoCanvas");
-				sortPlacePlayer();
-				startGame();
+				if(sortPlacePlayer() === true)
+					startGame();
+				else
+					choosePosition();
 			}
 			break;
-		case "move":
-			//console.log(data);
+		case "movePaddle":
 			repositionPaddle(peer.id, data.position);
+			break;
+		case "setBall":
+			setBall(data.position);
+			break;
+		case "newScore":
+			setScore(data.score);
 			break;
 		default:
 			console.log(data);
@@ -142,10 +160,14 @@ function doStuff(peer, data){
 	//console.log(y);
 }
 
+function setBall(pos) {
+	ball.x = pos.x;
+	ball.y = pos.y;
+}
 
-var y = 0;
-var stage;
-
+function setScore(score) {
+	scoreText.text = score;
+}
 
 //createjs
 function init() {
@@ -156,45 +178,44 @@ function startGame() {
 	console.log("Start Game");
 	//litle delay before game start
 	window.setTimeout(function() {
-		gameLoop();
+		addBall();
+		addScore();
+	//set FPS
+	createjs.Ticker.setFPS(15);
+
+	if (beMaster())
+		createjs.Ticker.addEventListener("tick", gameLoopMaster);
+	else
+		createjs.Ticker.addEventListener("tick", gameLoop);
+
 	}, 100);
 }
-
-function gameLoop() {
-	var ball = new createjs.Shape();
+function addBall() {
+	ball = new createjs.Shape();
 	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
 	ball.x = stage.canvas.width / 2;
 	ball.y = stage.canvas.height / 2;
 	//ball.snapToPixel = false;
 	stage.addChild(ball);
-	//stage.update();
-	 var scoreText = new createjs.Text("0,0,0,0", "30px Arial", "#fff");
+	ball.checkCollision = function(a) {
+		var b = {x: this.x, y: this.y, width: 10, height: 10};
+		if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
+			return true;
+		}
+		return false;
+	}
+}
+
+function addScore() {
+	scoreText = new createjs.Text("0,0,0,0", "30px Arial", "#fff");
 	scoreText.x = stage.canvas.width / 2;
 	scoreText.y = stage.canvas.height / 2;
 	scoreText.textAlign = "center";
 	scoreText.textBaseline = "middle";
 	stage.addChild(scoreText);
-
-	console.log(ball);
-	ball.checkCollision = function(a) {
-			var b = {x: this.x, y: this.y, width: 10, height: 10};
-			//vertical check
-			if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
-				//console.log("first");
-			 	return true;
-			}
-			//horizontal check
-			/*if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2){
-				console.log("secound");
-			 	return true;
-			}
-			*/
-			return false;
 }
-	createjs.Ticker.setFPS(30);
-	
-	createjs.Ticker.addEventListener("tick", handleTick);
-	function handleTick(event) {
+
+function gameLoopMaster(event) {
 		// Actions carried out each tick (aka frame)
 		if (!event.paused) {
 			// Actions carried out when the Ticker is not paused.
@@ -204,7 +225,7 @@ function gameLoop() {
 			//collision detection
 			for (var i = 0; i < stage.children.length && !collision; i++) {
 				if(stage.children[i].playerId)
-				var collision = ball.checkCollision(stage.children[i]);
+					var collision = ball.checkCollision(stage.children[i]);
 			}
 			if (collision) {
 				console.log("collision");
@@ -225,7 +246,7 @@ function gameLoop() {
 				speedX *= -1;
 				hitWall = true;
 			}
- 			if (ball.y + speedY > maxHeight - wall) {
+			if (ball.y + speedY > maxHeight - wall) {
 				score[1]++;
 				speedY *= -1;
 				hitWall = true;
@@ -237,14 +258,39 @@ function gameLoop() {
 			}
 
 			if(hitWall) {
+				sendScore(score);
 				scoreText.text = score;
 			}
-				ball.x += speedX;
-				ball.y += speedY;
+
+			ball.x += speedX;
+			ball.y += speedY;
+			sendBallPosition(ball.x, ball.y);
 			stage.update();
 		}
 
-	}
+}
+
+function sendBallPosition(x, y) {
+	sendAll({msg: "", job: "setBall", position: {x: x, y: y}});
+}
+
+function sendScore(score) {
+	sendAll({msg: "", job: "newScore", score: score});
+}
+
+function gameLoop(event) {
+		// Actions carried out each tick (aka frame)
+		if (!event.paused) {
+			// Actions carried out when the Ticker is not paused.
+			stage.update();
+		}
+}
+
+function beMaster() {
+	var id = webrtc.connection.getSessionid();
+	if (players[0].id === id)
+		return true;
+	return false;
 }
 
 function checkState() {
@@ -339,12 +385,12 @@ document.onkeydown = function(e){
 		//up arrow
 		case 38: 
 				direction = "up"
-				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
+				sendAll({msg: "Please move my paddle", job: "movePaddle", position: movePaddle(myId, direction)});
 			break;
 			//down arrow
 		case 40: 
 				direction = "down"
-				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
+				sendAll({msg: "Please move my paddle", job: "movePaddle", position: movePaddle(myId, direction)});
 			break;
 	}
 }
