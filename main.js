@@ -1,6 +1,7 @@
 var PADDLE_LENGHT = 100;
+var PADDLE_HEIGHT = 6;
 var speedX = 5;
-var speedY = -5;
+var speedY = 5;
 var score = [0, 0, 0, 0];
 
 var webrtc = new SimpleWebRTC({
@@ -121,6 +122,53 @@ function sortPlacePlayer(){
 
 }
 
+function putangle(){
+
+ 	var positionX = 1;
+	var positionY = 1;
+
+	for(var i = 0; i<4;i++){
+		switch(i){
+			case 0:  positionX = 1;
+							 positionY = 0;
+							 putAnglePosition(positionX,positionY);
+							break;
+			case 1:  positionX = 0;
+							 positionY = 1;
+							 putAnglePosition(positionX,positionY);
+							break;
+			case 2:  positionX = 1;
+							 positionY = 1;
+							putAnglePosition(positionX,positionY);
+							break;
+			case 3:  positionX = 0;
+							 positionY = 0;
+							putAnglePosition(positionX,positionY);
+							break;
+		}
+
+	}
+}
+
+function putAnglePosition(positionY,positionX){
+	var shape = [];
+	shape[0]= new createjs.Shape();
+	shape[1]= new createjs.Shape();
+
+	shape[0].graphics.beginFill("White").drawRect(-20/2, -50/2, 20, 50);
+	shape[0].x = stage.canvas.width * positionX ;
+	shape[0].y = stage.canvas.height * positionY ;
+	shape[0].width = 55;
+	shape[0].height = 25;
+	stage.addChild(shape[0]);
+	shape[1].graphics.beginFill("White").drawRect(-50/2, -20/2, 50, 20);
+	shape[1].x = stage.canvas.width * positionX;
+	shape[1].y = stage.canvas.height* positionY;
+	shape[1].width = 25;
+	shape[1].height = 55;
+	stage.addChild(shape[1]);
+}
+
 function doStuff(peer, data){
 	switch (data.job) {
 		case "posInit":
@@ -128,6 +176,7 @@ function doStuff(peer, data){
 			if(players.length === 4 && !stage) {
 				stage = new createjs.Stage("demoCanvas");
 				sortPlacePlayer();
+				putangle();
 				startGame();
 			}
 			break;
@@ -192,7 +241,7 @@ function gameLoop() {
 			return false;
 }
 	createjs.Ticker.setFPS(30);
-	
+
 	createjs.Ticker.addEventListener("tick", handleTick);
 	function handleTick(event) {
 		// Actions carried out each tick (aka frame)
@@ -203,7 +252,7 @@ function gameLoop() {
 			//console.log(ball.x, ball.y)
 			//collision detection
 			for (var i = 0; i < stage.children.length && !collision; i++) {
-				if(stage.children[i].playerId)
+				//if(stage.children[i].playerId)
 				var collision = ball.checkCollision(stage.children[i]);
 			}
 			if (collision) {
@@ -257,12 +306,12 @@ function addPlayer(id) {
 	var pos = findNextPostion();
 	if (pos) {
 		if (pos.vertical === true) {
-			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -6/2, PADDLE_LENGHT, 6);
+			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -PADDLE_HEIGHT/2, PADDLE_LENGHT, PADDLE_HEIGHT);
 			player.width = PADDLE_LENGHT;
 			player.height = 10;
 		}
 		else {
-			player.graphics.beginFill("White").drawRect(-6/2, -(PADDLE_LENGHT/2), 6, PADDLE_LENGHT);
+			player.graphics.beginFill("White").drawRect(-PADDLE_HEIGHT/2, -(PADDLE_LENGHT/2), PADDLE_HEIGHT, PADDLE_LENGHT);
 			player.width = 10;
 			player.height = PADDLE_LENGHT;
 		}
@@ -313,11 +362,11 @@ function movePaddle(peerId, direction){
 	}
 
 	if(peer.vertical) {
-		if(peer.element.y + step - PADDLE_LENGHT/2 > 0 && peer.element.y + step + PADDLE_LENGHT/2 < stage.canvas.height) 
+		if(peer.element.y + step - PADDLE_LENGHT/2 > 27 && peer.element.y + step + PADDLE_LENGHT/2 < stage.canvas.height - 27)
 			peer.element.y += step;
 	}
 	else {
-		if(peer.element.x + step - PADDLE_LENGHT/2 > 0 && peer.element.x + step + PADDLE_LENGHT/2 < stage.canvas.width) 
+		if(peer.element.x + step - PADDLE_LENGHT/2 > 27 && peer.element.x + step + PADDLE_LENGHT/2 < stage.canvas.width - 27)
 			peer.element.x += step;
 	}
 	//stage.update();
@@ -337,12 +386,12 @@ document.onkeydown = function(e){
 	var myId = webrtc.connection.getSessionid();
 	switch (e.keyCode){
 		//up arrow
-		case 38: 
+		case 38:
 				direction = "up"
 				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
 			break;
 			//down arrow
-		case 40: 
+		case 40:
 				direction = "down"
 				sendAll({msg: "Please move my paddle", job: "move", position: movePaddle(myId, direction)});
 			break;
