@@ -8,7 +8,7 @@ var playerCount = 0;
 var stage;
 var master = false;
 var ball;
-var scoreText;
+var scoreText = [];
 
 var webrtc = new SimpleWebRTC({
 	// we don't do video
@@ -194,6 +194,7 @@ function doStuff(peer, data){
 			if(players.length === 4 && !stage) {
 				stage = new createjs.Stage("demoCanvas");
 				putangle();
+				createCross();
 				if(sortPlacePlayer() === true)
 					startGame();
 				else
@@ -224,7 +225,8 @@ function setBall(pos) {
 }
 
 function setScore(score) {
-	scoreText.text = score;
+	for(var i = 0; i < 4; i++)
+	scoreText[i].text = score[i];
 }
 
 //createjs
@@ -264,13 +266,42 @@ function addBall() {
 	}
 }
 
-function addScore() {
-	scoreText = new createjs.Text("0,0,0,0", "30px Arial", "#fff");
-	scoreText.x = stage.canvas.width / 2;
-	scoreText.y = stage.canvas.height / 2;
-	scoreText.textAlign = "center";
-	scoreText.textBaseline = "middle";
-	stage.addChild(scoreText);
+
+function addScore(positionX,positionY) {
+	var positionX;
+	var positionY;
+
+for(var i = 0; i < 4; i++){
+	switch(i){
+		case 0: positionX = stage.canvas.width/2 - stage.canvas.width/8;
+						positionY = stage.canvas.height/2;
+						addScorePosition(i,positionX,positionY);
+						break;
+		case 1: positionX = stage.canvas.width/2;
+						positionY = stage.canvas.height/2 + stage.canvas.height/8;
+						addScorePosition(i,positionX,positionY);
+						break;
+		case 2: positionX = stage.canvas.width/2 + stage.canvas.width/8;
+						positionY = stage.canvas.height/2;
+						addScorePosition(i,positionX,positionY);
+						break;
+		case 3: positionX = stage.canvas.width/2;
+						positionY = stage.canvas.height/2 - stage.canvas.height/8;
+						addScorePosition(i,positionX,positionY);
+						break;
+	}
+}
+}
+
+function addScorePosition(i,positionX,positionY){
+
+	scoreText[i] = new createjs.Text("0", "30px Arial", "#fff");
+
+	scoreText[i].x = positionX;
+	scoreText[i].y = positionY;
+	scoreText[i].textAlign = "center";
+	scoreText[i].textBaseline = "middle";
+	stage.addChild(scoreText[i]);
 }
 
 function gameLoopMaster(event) {
@@ -333,7 +364,7 @@ function gameLoopMaster(event) {
 
 		if(hitWall) {
 			sendScore(score);
-			scoreText.text = score;
+			setScore(score);
 		}
 
 		ball.x += speedX;
@@ -470,4 +501,31 @@ document.onkeydown = function(e){
 				sendAll({msg: "Please move my paddle", job: "movePaddle", position: movePaddle(myId, direction)});
 			break;
 	}
+}
+
+createjs.Graphics.prototype.dashedLineTo = function(x1, y1, x2, y2, dashLen) {
+    this.moveTo(x1, y1);
+
+    var dX = x2 - x1;
+    var dY = y2 - y1;
+    var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+    var dashX = dX / dashes;
+    var dashY = dY / dashes;
+
+    var q = 0;
+    while (q++ < dashes) {
+        x1 += dashX;
+        y1 += dashY;
+        this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+    }
+    this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+}
+
+function createCross() {
+var shape = new createjs.Shape();
+shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(0,0,stage.canvas.width,stage.canvas.height, 4);
+stage.addChild(shape);
+
+shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
+stage.addChild(shape);
 }
