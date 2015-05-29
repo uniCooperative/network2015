@@ -162,7 +162,7 @@ function startGame() {
 
 function gameLoop() {
 	var ball = new createjs.Shape();
-	ball.graphics.beginFill("Crimson").drawCircle(0, 0, 10);
+	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
 	ball.x = stage.canvas.width / 2;
 	ball.y = stage.canvas.height / 2;
 	//ball.snapToPixel = false;
@@ -177,7 +177,7 @@ function gameLoop() {
 
 	console.log(ball);
 	ball.checkCollision = function(a) {
-			var b = {x: this.x, y: this.y, width: 20, height: 20};
+			var b = {x: this.x, y: this.y, width: 10, height: 10};
 			//vertical check
 			if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
 				//console.log("first");
@@ -257,12 +257,12 @@ function addPlayer(id) {
 	var pos = findNextPostion();
 	if (pos) {
 		if (pos.vertical === true) {
-			player.graphics.beginFill("DeepSkyBlue").drawRect(-(PADDLE_LENGHT/2), -10/2, PADDLE_LENGHT, 10);
+			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -6/2, PADDLE_LENGHT, 6);
 			player.width = PADDLE_LENGHT;
 			player.height = 10;
 		}
 		else {
-			player.graphics.beginFill("Crimson").drawRect(-10/2, -(PADDLE_LENGHT/2), 10, PADDLE_LENGHT);
+			player.graphics.beginFill("White").drawRect(-6/2, -(PADDLE_LENGHT/2), 6, PADDLE_LENGHT);
 			player.width = 10;
 			player.height = PADDLE_LENGHT;
 		}
