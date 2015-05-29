@@ -247,6 +247,7 @@ function init() {
 }
 
 function startGame() {
+	whoAmI();
 	console.log("Start Game");
 	//nice Countdown untile game start
 	var text = new createjs.Text(5, "100px Arial", "#fff");
@@ -434,6 +435,51 @@ function beMaster() {
 	if (players[0].id === id)
 		return true;
 	return false;
+}
+function myPosition() {
+	var id = webrtc.connection.getSessionid();
+	for(var i = 0; i < 4; i++)
+	if (players[i].id === id)
+		return i;
+	return 5;
+}
+
+function whoAmI(){
+	var id = webrtc.connection.getSessionid();
+	var Iam = new createjs.Shape();
+	var i =myPosition()
+	var tr_width = stage.canvas.width/16;
+	var tr_height = stage.canvas.height/16;
+	console.log(i);
+	switch(i) {
+		case 0: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			Iam.graphics.moveTo(stage.canvas.width/2-10,stage.canvas.height/2).lineTo(stage.canvas.width/2 - tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2-10,stage.canvas.height/2);
+			stage.addChild(Iam);
+			break;
+		case 1:	Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			//Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2+10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2+10);
+			Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2-10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2-10);
+			stage.addChild(Iam);
+			break;
+		case 2: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			Iam.graphics.moveTo(stage.canvas.width/2+10,stage.canvas.height/2).lineTo(stage.canvas.width/2 + tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2+10,stage.canvas.height/2);
+
+			stage.addChild(Iam);
+			break;
+		case 3: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			//Iam.graphics.moveTo(stage.canvas.width/2+10,stage.canvas.height/2).lineTo(stage.canvas.width/2 + tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2+10,stage.canvas.height/2);
+			Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2+10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2+10);
+			stage.addChild(Iam);
+			break;
+	}
+		//my position
+
+
+
 }
 
 function checkState() {
