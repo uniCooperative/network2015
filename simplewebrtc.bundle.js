@@ -4968,7 +4968,7 @@ function WebRTC(opts) {
             // makes the entire PC config overridable
             peerConnectionConfig: {
                 //iceServers: [{"url": "stun:stun.l.google.com:19302"}]
-                iceServers: [{"url": "stun:stun.ekiga.net"}]
+								iceServers: [{"url": "stun:stun01.sipphone.com"}]
             },
             peerConnectionConstraints: {
                 optional: [
