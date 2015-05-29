@@ -2,7 +2,6 @@ var PADDLE_LENGHT = 100;
 var speedX = -2;
 var speedY = -5;
 var score = [0, 0, 0, 0];
-var player1 = false;
 var players = [];
 var y = 0;
 var stage;
@@ -25,9 +24,16 @@ var webrtc = new SimpleWebRTC({
 	}
 });
 
-
+function createRoom() {
+	var room = "room" + parseInt(Math.random()*10000);
+	if (history.pushState) {
+    var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + room;
+    window.history.pushState({path:newurl},'',newurl);
+	}
+	return room;
+}
 // join without waiting for media
-webrtc.joinRoom('julian');
+webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 
 // called when a peer is created
 webrtc.on('createdPeer', function (peer) {
@@ -64,6 +70,7 @@ webrtc.on('createdPeer', function (peer) {
 
 webrtc.on('joinedRoom', function (room) {
 	console.log("entered room " + room);
+
 	//addPlayer(webrtc.connection.getSessionid());
 	//stage.update();
 });
