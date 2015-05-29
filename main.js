@@ -357,7 +357,11 @@ function gameLoopMaster(event) {
 					var hitPos = (ball.y - paddle.y)/50;
 					var y = 4 * hitPos;
 					speedy = y;
-					speedY = Math.sqrt((speed*speed) - (y*y));
+					if(speedX > 1)
+					speedX = Math.sqrt((speed*speed) - (y*y))*-1;
+					else {
+						speedX = Math.sqrt((speed*speed) - (y*y));
+					}
 					console.log(hitPos);
 
 				}
@@ -367,11 +371,15 @@ function gameLoopMaster(event) {
 						var x = 4 * hitPos;
 					speedX = x;
 					// where 25 (5*5) is resulting speed
-					speedY = Math.sqrt((speed*speed) - (x*x));
+					if(speedY > 1)
+					speedY = Math.sqrt((speed*speed) - (x*x))*-1;
+					else {
+						speedY = Math.sqrt((speed*speed) - (x*x));
+					}
 					console.log(hitPos);
 				}
 			}
-			else {
+			else if(collision) {
 			speedX *= -1;
 			speedY *= -1;
 			}
