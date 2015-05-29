@@ -11,6 +11,7 @@ var master = false;
 var ball;
 var textPlayerCount;
 var scoreText = [];
+var soundPaddle = "paddle";
 
 var webrtc = new SimpleWebRTC({
 	// we don't do video
@@ -229,6 +230,8 @@ function setScore(score) {
 
 //createjs
 function init() {
+	createjs.Sound.registerSound("sound/sonar.ogg", "soundPaddle");
+	createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
 	stage = new createjs.Stage("demoCanvas");
 	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
 	textPlayerCount = new createjs.Text("0/4", "20px Arial", "#fff");
@@ -352,6 +355,7 @@ function gameLoopMaster(event) {
 			var collision = ball.checkCollision(stage.children[i]);
 			paddle = stage.children[i];
 			if (collision && paddle.vertical !== undefined) {
+				createjs.Sound.play("soundPaddle");
 				if(paddle.vertical) {
 					//value of intresst ball.y
 					var hitPos = (ball.y - paddle.y)/50;
@@ -372,8 +376,12 @@ function gameLoopMaster(event) {
 				}
 			}
 			else {
-			speedX *= -1;
-			speedY *= -1;
+			//collision with a angle
+			if (collision) {
+				createjs.Sound.play("soundPaddle");
+				speedX *= -1;
+				speedY *= -1;
+				}
 			}
 		}
 
@@ -402,6 +410,7 @@ function gameLoopMaster(event) {
 		}
 
 		if(hitWall) {
+			createjs.Sound.play("soundWall");
 			sendScore(score);
 			setScore(score);
 		}
