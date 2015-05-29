@@ -1,8 +1,8 @@
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
 var speed = 10;
-var speedX = -3;
-var speedY = -5;
+var speedX = -10;
+var speedY = 0;
 var score = [0, 0, 0, 0];
 var players = [];
 var playerCount = 0;
@@ -294,7 +294,7 @@ function addBall() {
 	stage.addChild(ball);
 	ball.checkCollision = function(a) {
 		var b = {x: this.x, y: this.y, width: 10, height: 10};
-		if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
+		if (b.x - b.width/2 <= a.x + a.width/2 && b.y - b.height/2 <= a.y + a.height/2 && b.x + b.width/2 >= a.x - a.width/2 && b.y + b.height/2 >= a.y - a.height/2) {
 			return true;
 		}
 		return false;
@@ -356,8 +356,8 @@ function gameLoopMaster(event) {
 					//value of intresst ball.y
 					var hitPos = (ball.y - paddle.y)/50;
 					var y = 4 * hitPos;
-					speedy = y;
-					if(speedX > 1)
+					speedY = y;
+					if(speedX >= 0)
 					speedX = Math.sqrt((speed*speed) - (y*y))*-1;
 					else {
 						speedX = Math.sqrt((speed*speed) - (y*y));
@@ -371,7 +371,7 @@ function gameLoopMaster(event) {
 						var x = 4 * hitPos;
 					speedX = x;
 					// where 25 (5*5) is resulting speed
-					if(speedY > 1)
+					if(speedY >= 0)
 					speedY = Math.sqrt((speed*speed) - (x*x))*-1;
 					else {
 						speedY = Math.sqrt((speed*speed) - (x*x));
@@ -387,23 +387,22 @@ function gameLoopMaster(event) {
 
 		var hitWall = false;
 		//All 4 walls
-		var wall = 10;
-		if (ball.x + speedX > maxWidth - wall) {
+		if (ball.x + speedX > maxWidth ) {
 			score[2]++;
 			speedX *= -1;
 			hitWall = true;
 		}
-		if (ball.x + speedX < 0 + wall) {
+		if (ball.x + speedX < 0 ) {
 			score[0]++;
 			speedX *= -1;
 			hitWall = true;
 		}
-		if (ball.y + speedY > maxHeight - wall) {
+		if (ball.y + speedY > maxHeight ) {
 			score[1]++;
 			speedY *= -1;
 			hitWall = true;
 		}
-		if (ball.y + speedY < 0 + wall) {
+		if (ball.y + speedY < 0 ) {
 			score[3]++;
 			speedY *= -1;
 			hitWall = true;
