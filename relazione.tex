@@ -1,9 +1,5 @@
 ﻿\documentclass[11pt, a4paper, titlepage, block]{article}
-\usepackage{listings}
-\usepackage{graphicx}
 \hyphenpenalty=10000
-\usepackage[utf8]{inputenc}
-\usepackage{pdfpages}
 \begin{document}
 	\begin{titlepage}
 
@@ -92,7 +88,8 @@ Le risposte permettono anche al client STUN di determinare che tipo di NAT è in
 Ci sono tre tipi di NAT che è possibile attraversare tramite STUN: Full Cone, Restricted Cone e Port Restricted Cone.\\
 STUN non lavora con il quarto tipo di NAT, detto simmetrico o bidirezionale, questo a causa del fatto che i dati trovati dal server STUN non saranno validi per terze parti, in quanto il NAT bidirezionale non permette a terzi di riusare IP e porte abilitate, differenziando le associazioni a seconda dell'host contattato.\\
 
-Client e server STUN sono utilizzati con protocolli come SIP tramite UDP per il trasferimento di traffico voce/video/testo su Internet.
+Client e server STUN sono utilizzati con protocolli come SIP tramite UDP per il trasferimento di traffico voce/video/testo su Internet.\\
+\\
 
 WebRTC tramite un iceserver sfruttato per l autenticazione mette in una comunicazione peertopeer due o piu' browser.\\
 Il gioco del pong e' composto da questi elementi:\\
@@ -113,6 +110,24 @@ Gli utenti "extra" potranno far da spettatori alla partita.\\
 	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da google.
 
 \section{Testing del Programma}
-
+	Screenshots:
+\\
+\\
+All inizio del gioco aspetto l arrico di 4 giocatori..
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture1.jpg}
+\\
+\\
+Una volta connessi i 4 giocatori il master invia agli altri giocatori la pallina..
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture2.jpg}
+\\
+\\
+E i suoi relativi spostamenti..
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture3.jpg}
+\\
+\\
+Ogni giocatore invia i gol subiti agli altri giocatori..
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture4.jpg}
+	\\	
+	\\
 
 \end{document}
