@@ -1,6 +1,6 @@
 var PADDLE_LENGHT = 100;
-var speedX = 0;
-var speedY = 3;
+var speedX = 5;
+var speedY = -5;
 var score = [0, 0, 0, 0];
 
 var webrtc = new SimpleWebRTC({
@@ -179,9 +179,16 @@ function gameLoop() {
 	ball.checkCollision = function(a) {
 			var b = {x: this.x, y: this.y, width: 20, height: 20};
 			//vertical check
-			if (b.x - b.width/2 < a.x + a.width/2 && b.y + b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) return true;
+			if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
+				//console.log("first");
+			 	return true;
+			}
 			//horizontal check
-			if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2) return true;
+			/*if (b.x + b.width/2 > a.x - a.width/2 && b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height && b.y + b.height/2 > a.y - a.height/2){
+				console.log("secound");
+			 	return true;
+			}
+			*/
 			return false;
 }
 	createjs.Ticker.setFPS(30);
