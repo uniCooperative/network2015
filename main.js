@@ -197,7 +197,7 @@ function doStuff(peer, data){
 				if(sortPlacePlayer() === true)
 					startGame();
 				else
-					choosePosition();
+					choosePositon();
 			}
 			break;
 		case "movePaddle":
@@ -217,8 +217,10 @@ function doStuff(peer, data){
 }
 
 function setBall(pos) {
-	ball.x = pos.x;
-	ball.y = pos.y;
+	if(ball) {
+		ball.x = pos.x;
+		ball.y = pos.y;
+	}
 }
 
 function setScore(score) {
@@ -282,11 +284,27 @@ function gameLoopMaster(event) {
 		for (var i = 0; i < stage.children.length && !collision; i++) {
 			//if(stage.children[i].playerId)
 			var collision = ball.checkCollision(stage.children[i]);
-		}
-		if (collision) {
-			console.log("collision");
-			speedX *= -1;
-			speedY *= -1;
+				paddle = stage.children[i];
+			if (collision && paddle.vertical !== undefined) {
+				if(paddle.vertical) {
+					//value of intresst ball.y
+					var hitPos = (ball.y - paddle.y)/50;
+					var y = 4 * hitPos;
+					speedy = y;
+					speedY = Math.sqrt(25 - (y*y));
+					console.log(hitPos);
+
+				}
+				else {
+					//value of intresst ball.x
+					var hitPos = (ball.x - paddle.x)/50
+					var x = 4 * hitPos;
+					speedX = x;
+					// where 25 (5*5) is resulting speed
+					speedY = Math.sqrt(25 - (x*x));
+					console.log(hitPos);
+				}
+			}
 		}
 
 		var hitWall = false;
@@ -360,11 +378,13 @@ function addPlayer(id) {
 	if (pos) {
 		if (pos.vertical === true) {
 			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -PADDLE_HEIGHT/2, PADDLE_LENGHT, PADDLE_HEIGHT);
+			player.vertical = false;
 			player.width = PADDLE_LENGHT;
 			player.height = 10;
 		}
 		else {
 			player.graphics.beginFill("White").drawRect(-PADDLE_HEIGHT/2, -(PADDLE_LENGHT/2), PADDLE_HEIGHT, PADDLE_LENGHT);
+			player.vertical = true;
 			player.width = 10;
 			player.height = PADDLE_LENGHT;
 		}
