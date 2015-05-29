@@ -8,6 +8,7 @@ var playerCount = 0;
 var stage;
 var master = false;
 var ball;
+var textPlayerCount;
 var scoreText = [];
 
 var webrtc = new SimpleWebRTC({
@@ -33,8 +34,6 @@ function createRoom() {
 	}
 	return room;
 }
-// join without waiting for media
-webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 
 // called when a peer is created
 webrtc.on('createdPeer', function (peer) {
@@ -63,10 +62,8 @@ webrtc.on('createdPeer', function (peer) {
 		console.log("Ready to play");
 		initGame();
 	}
-
-	div.innerHTML = "";
-	for (var i = 0; i < allPeers.length; i++)
-		div.innerHTML += allPeers[i].id + "</p>";
+	textPlayerCount.text = (allPeers.length + 1) + "/4";
+	stage.update();
 });
 
 webrtc.on('joinedRoom', function (room) {
@@ -191,7 +188,7 @@ function doStuff(peer, data){
 	switch (data.job) {
 		case "posInit":
 			players.push({id: peer.id, rnd: data.rnd});
-			if(players.length === 4 && !stage) {
+			if(players.length === 4) {
 				stage = new createjs.Stage("demoCanvas");
 				putangle();
 				createCross();
@@ -226,30 +223,66 @@ function setBall(pos) {
 
 function setScore(score) {
 	for(var i = 0; i < 4; i++)
-	scoreText[i].text = score[i];
+		scoreText[i].text = score[i];
 }
 
 //createjs
 function init() {
-
+	stage = new createjs.Stage("demoCanvas");
+	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
+	textPlayerCount = new createjs.Text("0/4", "20px Arial", "#fff");
+		text.x = stage.canvas.width / 2;
+		text.y = stage.canvas.height / 2;
+		text.textAlign = "center";
+		text.textBaseline = "middle";
+		textPlayerCount.x = stage.canvas.width / 2;
+		textPlayerCount.y = stage.canvas.height / 2 + 30;
+		textPlayerCount.textAlign = "center";
+		stage.addChild(text);
+		stage.addChild(textPlayerCount);
+		stage.update();
+	// join without waiting for media
+	webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 }
 
 function startGame() {
 	console.log("Start Game");
-	//litle delay before game start
-	window.setTimeout(function() {
-		addBall();
-		addScore();
-		//set FPS
-		createjs.Ticker.setFPS(15);
-
-		if (beMaster())
-			createjs.Ticker.addEventListener("tick", gameLoopMaster);
-		else
-			createjs.Ticker.addEventListener("tick", gameLoop);
-
-	}, 100);
+	//nice Countdown untile game start
+	var text = new createjs.Text(5, "100px Arial", "#fff");
+	countDown(text, 5);
 }
+
+function addGameTicker() {
+	addScore();
+	addBall();
+	//set FPS
+	createjs.Ticker.setFPS(15);
+
+	if (beMaster())
+		createjs.Ticker.addEventListener("tick", gameLoopMaster);
+	else
+		createjs.Ticker.addEventListener("tick", gameLoop);
+}
+
+function countDown(text, i) {
+	window.setTimeout(function() {
+		text.text = i;
+		text.x = stage.canvas.width / 2;
+		text.y = stage.canvas.height / 2;
+		text.textAlign = "center";
+		text.textBaseline = "middle";
+		stage.addChild(text);
+		if (i > 0) {
+			stage.update();
+			countDown(text, i-1);
+		}
+		else {
+			stage.removeChild(text);
+			addGameTicker();
+		}
+	}, 1000);
+}
+
 function addBall() {
 	ball = new createjs.Shape();
 	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
@@ -271,26 +304,26 @@ function addScore(positionX,positionY) {
 	var positionX;
 	var positionY;
 
-for(var i = 0; i < 4; i++){
-	switch(i){
-		case 0: positionX = stage.canvas.width/2 - stage.canvas.width/8;
-						positionY = stage.canvas.height/2;
-						addScorePosition(i,positionX,positionY);
-						break;
-		case 1: positionX = stage.canvas.width/2;
-						positionY = stage.canvas.height/2 + stage.canvas.height/8;
-						addScorePosition(i,positionX,positionY);
-						break;
-		case 2: positionX = stage.canvas.width/2 + stage.canvas.width/8;
-						positionY = stage.canvas.height/2;
-						addScorePosition(i,positionX,positionY);
-						break;
-		case 3: positionX = stage.canvas.width/2;
-						positionY = stage.canvas.height/2 - stage.canvas.height/8;
-						addScorePosition(i,positionX,positionY);
-						break;
+	for(var i = 0; i < 4; i++){
+		switch(i){
+			case 0: positionX = stage.canvas.width/2 - stage.canvas.width/8;
+							positionY = stage.canvas.height/2;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 1: positionX = stage.canvas.width/2;
+							positionY = stage.canvas.height/2 + stage.canvas.height/8;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 2: positionX = stage.canvas.width/2 + stage.canvas.width/8;
+							positionY = stage.canvas.height/2;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 3: positionX = stage.canvas.width/2;
+							positionY = stage.canvas.height/2 - stage.canvas.height/8;
+							addScorePosition(i,positionX,positionY);
+							break;
+		}
 	}
-}
 }
 
 function addScorePosition(i,positionX,positionY){
@@ -315,7 +348,7 @@ function gameLoopMaster(event) {
 		for (var i = 0; i < stage.children.length && !collision; i++) {
 			//if(stage.children[i].playerId)
 			var collision = ball.checkCollision(stage.children[i]);
-				paddle = stage.children[i];
+			paddle = stage.children[i];
 			if (collision && paddle.vertical !== undefined) {
 				if(paddle.vertical) {
 					//value of intresst ball.y
@@ -329,7 +362,7 @@ function gameLoopMaster(event) {
 				else {
 					//value of intresst ball.x
 					var hitPos = (ball.x - paddle.x)/50
-					var x = 4 * hitPos;
+						var x = 4 * hitPos;
 					speedX = x;
 					// where 25 (5*5) is resulting speed
 					speedY = Math.sqrt(25 - (x*x));
@@ -504,28 +537,28 @@ document.onkeydown = function(e){
 }
 
 createjs.Graphics.prototype.dashedLineTo = function(x1, y1, x2, y2, dashLen) {
-    this.moveTo(x1, y1);
+	this.moveTo(x1, y1);
 
-    var dX = x2 - x1;
-    var dY = y2 - y1;
-    var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
-    var dashX = dX / dashes;
-    var dashY = dY / dashes;
+	var dX = x2 - x1;
+	var dY = y2 - y1;
+	var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+	var dashX = dX / dashes;
+	var dashY = dY / dashes;
 
-    var q = 0;
-    while (q++ < dashes) {
-        x1 += dashX;
-        y1 += dashY;
-        this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
-    }
-    this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+	var q = 0;
+	while (q++ < dashes) {
+		x1 += dashX;
+		y1 += dashY;
+		this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+	}
+	this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
 }
 
 function createCross() {
-var shape = new createjs.Shape();
-shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(0,0,stage.canvas.width,stage.canvas.height, 4);
-stage.addChild(shape);
+	var shape = new createjs.Shape();
+	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(0,0,stage.canvas.width,stage.canvas.height, 4);
+	stage.addChild(shape);
 
-shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
-stage.addChild(shape);
+	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
+	stage.addChild(shape);
 }
