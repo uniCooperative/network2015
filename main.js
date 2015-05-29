@@ -1,6 +1,7 @@
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
-var speedX = -2;
+var speed = 10;
+var speedX = -3;
 var speedY = -5;
 var score = [0, 0, 0, 0];
 var players = [];
@@ -355,7 +356,7 @@ function gameLoopMaster(event) {
 					var hitPos = (ball.y - paddle.y)/50;
 					var y = 4 * hitPos;
 					speedy = y;
-					speedY = Math.sqrt(25 - (y*y));
+					speedY = Math.sqrt((speed*speed) - (y*y));
 					console.log(hitPos);
 
 				}
@@ -365,9 +366,13 @@ function gameLoopMaster(event) {
 						var x = 4 * hitPos;
 					speedX = x;
 					// where 25 (5*5) is resulting speed
-					speedY = Math.sqrt(25 - (x*x));
+					speedY = Math.sqrt((speed*speed) - (x*x));
 					console.log(hitPos);
 				}
+			}
+			else {
+			speedX *= -1;
+			speedY *= -1;
 			}
 		}
 
