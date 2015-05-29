@@ -1,14 +1,17 @@
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
-var speedX = -2;
-var speedY = -5;
+var speed = 10;
+var speedX = -10;
+var speedY = 0;
 var score = [0, 0, 0, 0];
 var players = [];
 var playerCount = 0;
 var stage;
 var master = false;
 var ball;
-var scoreText;
+var textPlayerCount;
+var scoreText = [];
+var soundPaddle = "paddle";
 
 var webrtc = new SimpleWebRTC({
 	// we don't do video
@@ -33,8 +36,6 @@ function createRoom() {
 	}
 	return room;
 }
-// join without waiting for media
-webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 
 // called when a peer is created
 webrtc.on('createdPeer', function (peer) {
@@ -63,10 +64,8 @@ webrtc.on('createdPeer', function (peer) {
 		console.log("Ready to play");
 		initGame();
 	}
-
-	div.innerHTML = "";
-	for (var i = 0; i < allPeers.length; i++)
-		div.innerHTML += allPeers[i].id + "</p>";
+	textPlayerCount.text = (allPeers.length + 1) + "/4";
+	stage.update();
 });
 
 webrtc.on('joinedRoom', function (room) {
@@ -191,13 +190,14 @@ function doStuff(peer, data){
 	switch (data.job) {
 		case "posInit":
 			players.push({id: peer.id, rnd: data.rnd});
-			if(players.length === 4 && !stage) {
+			if(players.length === 4) {
 				stage = new createjs.Stage("demoCanvas");
 				putangle();
+				createCross();
 				if(sortPlacePlayer() === true)
 					startGame();
 				else
-					choosePosition();
+					choosePositon();
 			}
 			break;
 		case "movePaddle":
@@ -217,35 +217,77 @@ function doStuff(peer, data){
 }
 
 function setBall(pos) {
-	ball.x = pos.x;
-	ball.y = pos.y;
+	if(ball) {
+		ball.x = pos.x;
+		ball.y = pos.y;
+	}
 }
 
 function setScore(score) {
-	scoreText.text = score;
+	for(var i = 0; i < 4; i++)
+		scoreText[i].text = score[i];
 }
 
 //createjs
 function init() {
-
+	createjs.Sound.registerSound("sound/sonar.ogg", "soundPaddle");
+	createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
+	stage = new createjs.Stage("demoCanvas");
+	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
+	textPlayerCount = new createjs.Text("0/4", "20px Arial", "#fff");
+		text.x = stage.canvas.width / 2;
+		text.y = stage.canvas.height / 2;
+		text.textAlign = "center";
+		text.textBaseline = "middle";
+		textPlayerCount.x = stage.canvas.width / 2;
+		textPlayerCount.y = stage.canvas.height / 2 + 30;
+		textPlayerCount.textAlign = "center";
+		stage.addChild(text);
+		stage.addChild(textPlayerCount);
+		stage.update();
+	// join without waiting for media
+	webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 }
 
 function startGame() {
+	whoAmI();
 	console.log("Start Game");
-	//litle delay before game start
-	window.setTimeout(function() {
-		addBall();
-		addScore();
-		//set FPS
-		createjs.Ticker.setFPS(15);
-
-		if (beMaster())
-			createjs.Ticker.addEventListener("tick", gameLoopMaster);
-		else
-			createjs.Ticker.addEventListener("tick", gameLoop);
-
-	}, 100);
+	//nice Countdown untile game start
+	var text = new createjs.Text(5, "100px Arial", "#fff");
+	countDown(text, 5);
 }
+
+function addGameTicker() {
+	addScore();
+	addBall();
+	//set FPS
+	createjs.Ticker.setFPS(15);
+
+	if (beMaster())
+		createjs.Ticker.addEventListener("tick", gameLoopMaster);
+	else
+		createjs.Ticker.addEventListener("tick", gameLoop);
+}
+
+function countDown(text, i) {
+	window.setTimeout(function() {
+		text.text = i;
+		text.x = stage.canvas.width / 2;
+		text.y = stage.canvas.height / 2;
+		text.textAlign = "center";
+		text.textBaseline = "middle";
+		stage.addChild(text);
+		if (i > 0) {
+			stage.update();
+			countDown(text, i-1);
+		}
+		else {
+			stage.removeChild(text);
+			addGameTicker();
+		}
+	}, 1000);
+}
+
 function addBall() {
 	ball = new createjs.Shape();
 	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
@@ -255,20 +297,49 @@ function addBall() {
 	stage.addChild(ball);
 	ball.checkCollision = function(a) {
 		var b = {x: this.x, y: this.y, width: 10, height: 10};
-		if (b.x - b.width/2 < a.x + a.width/2 && b.y - b.height/2 < a.y + a.height/2 && b.x + b.width/2 > a.x - a.width/2 && b.y + b.height/2 > a.y - a.height/2) {
+		if (b.x - b.width/2 <= a.x + a.width/2 && b.y - b.height/2 <= a.y + a.height/2 && b.x + b.width/2 >= a.x - a.width/2 && b.y + b.height/2 >= a.y - a.height/2) {
 			return true;
 		}
 		return false;
 	}
 }
 
-function addScore() {
-	scoreText = new createjs.Text("0,0,0,0", "30px Arial", "#fff");
-	scoreText.x = stage.canvas.width / 2;
-	scoreText.y = stage.canvas.height / 2;
-	scoreText.textAlign = "center";
-	scoreText.textBaseline = "middle";
-	stage.addChild(scoreText);
+
+function addScore(positionX,positionY) {
+	var positionX;
+	var positionY;
+
+	for(var i = 0; i < 4; i++){
+		switch(i){
+			case 0: positionX = stage.canvas.width/2 - stage.canvas.width/8;
+							positionY = stage.canvas.height/2;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 1: positionX = stage.canvas.width/2;
+							positionY = stage.canvas.height/2 + stage.canvas.height/8;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 2: positionX = stage.canvas.width/2 + stage.canvas.width/8;
+							positionY = stage.canvas.height/2;
+							addScorePosition(i,positionX,positionY);
+							break;
+			case 3: positionX = stage.canvas.width/2;
+							positionY = stage.canvas.height/2 - stage.canvas.height/8;
+							addScorePosition(i,positionX,positionY);
+							break;
+		}
+	}
+}
+
+function addScorePosition(i,positionX,positionY){
+
+	scoreText[i] = new createjs.Text("0", "30px Arial", "#fff");
+
+	scoreText[i].x = positionX;
+	scoreText[i].y = positionY;
+	scoreText[i].textAlign = "center";
+	scoreText[i].textBaseline = "middle";
+	stage.addChild(scoreText[i]);
 }
 
 function gameLoopMaster(event) {
@@ -282,40 +353,73 @@ function gameLoopMaster(event) {
 		for (var i = 0; i < stage.children.length && !collision; i++) {
 			//if(stage.children[i].playerId)
 			var collision = ball.checkCollision(stage.children[i]);
-		}
-		if (collision) {
-			console.log("collision");
-			speedX *= -1;
-			speedY *= -1;
+			paddle = stage.children[i];
+			if (collision && paddle.vertical !== undefined) {
+				createjs.Sound.play("soundPaddle");
+				if(paddle.vertical) {
+					//value of intresst ball.y
+					var hitPos = (ball.y - paddle.y)/50;
+					var y = 4 * hitPos;
+					speedY = y;
+					if(speedX >= 0)
+					speedX = Math.sqrt((speed*speed) - (y*y))*-1;
+					else {
+						speedX = Math.sqrt((speed*speed) - (y*y));
+					}
+					console.log(hitPos);
+
+				}
+				else {
+					//value of intresst ball.x
+					var hitPos = (ball.x - paddle.x)/50
+						var x = 4 * hitPos;
+					speedX = x;
+					// where 25 (5*5) is resulting speed
+					if(speedY >= 0)
+					speedY = Math.sqrt((speed*speed) - (x*x))*-1;
+					else {
+						speedY = Math.sqrt((speed*speed) - (x*x));
+					}
+					console.log(hitPos);
+				}
+			}
+			else {
+			//collision with a angle
+			if (collision) {
+				createjs.Sound.play("soundPaddle");
+				speedX *= -1;
+				speedY *= -1;
+				}
+			}
 		}
 
 		var hitWall = false;
 		//All 4 walls
-		var wall = 10;
-		if (ball.x + speedX > maxWidth - wall) {
+		if (ball.x + speedX > maxWidth ) {
 			score[2]++;
 			speedX *= -1;
 			hitWall = true;
 		}
-		if (ball.x + speedX < 0 + wall) {
+		if (ball.x + speedX < 0 ) {
 			score[0]++;
 			speedX *= -1;
 			hitWall = true;
 		}
-		if (ball.y + speedY > maxHeight - wall) {
+		if (ball.y + speedY > maxHeight ) {
 			score[1]++;
 			speedY *= -1;
 			hitWall = true;
 		}
-		if (ball.y + speedY < 0 + wall) {
+		if (ball.y + speedY < 0 ) {
 			score[3]++;
 			speedY *= -1;
 			hitWall = true;
 		}
 
 		if(hitWall) {
+			createjs.Sound.play("soundWall");
 			sendScore(score);
-			scoreText.text = score;
+			setScore(score);
 		}
 
 		ball.x += speedX;
@@ -348,6 +452,51 @@ function beMaster() {
 		return true;
 	return false;
 }
+function myPosition() {
+	var id = webrtc.connection.getSessionid();
+	for(var i = 0; i < 4; i++)
+	if (players[i].id === id)
+		return i;
+	return 5;
+}
+
+function whoAmI(){
+	var id = webrtc.connection.getSessionid();
+	var Iam = new createjs.Shape();
+	var i =myPosition()
+	var tr_width = stage.canvas.width/16;
+	var tr_height = stage.canvas.height/16;
+	console.log(i);
+	switch(i) {
+		case 0: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			Iam.graphics.moveTo(stage.canvas.width/2-10,stage.canvas.height/2).lineTo(stage.canvas.width/2 - tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2-10,stage.canvas.height/2);
+			stage.addChild(Iam);
+			break;
+		case 1:	Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			//Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2+10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2+10);
+			Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2-10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2-10);
+			stage.addChild(Iam);
+			break;
+		case 2: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			Iam.graphics.moveTo(stage.canvas.width/2+10,stage.canvas.height/2).lineTo(stage.canvas.width/2 + tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2+10,stage.canvas.height/2);
+
+			stage.addChild(Iam);
+			break;
+		case 3: Iam.graphics.beginStroke("white");
+			console.log("sono entrato");
+			//Iam.graphics.moveTo(stage.canvas.width/2+10,stage.canvas.height/2).lineTo(stage.canvas.width/2 + tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2+10,stage.canvas.height/2);
+			Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2+10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2+10);
+			stage.addChild(Iam);
+			break;
+	}
+		//my position
+
+
+
+}
 
 function checkState() {
 	console.log("Hello");
@@ -360,11 +509,13 @@ function addPlayer(id) {
 	if (pos) {
 		if (pos.vertical === true) {
 			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -PADDLE_HEIGHT/2, PADDLE_LENGHT, PADDLE_HEIGHT);
+			player.vertical = false;
 			player.width = PADDLE_LENGHT;
 			player.height = 10;
 		}
 		else {
 			player.graphics.beginFill("White").drawRect(-PADDLE_HEIGHT/2, -(PADDLE_LENGHT/2), PADDLE_HEIGHT, PADDLE_LENGHT);
+			player.vertical = true;
 			player.width = 10;
 			player.height = PADDLE_LENGHT;
 		}
@@ -450,4 +601,31 @@ document.onkeydown = function(e){
 				sendAll({msg: "Please move my paddle", job: "movePaddle", position: movePaddle(myId, direction)});
 			break;
 	}
+}
+
+createjs.Graphics.prototype.dashedLineTo = function(x1, y1, x2, y2, dashLen) {
+	this.moveTo(x1, y1);
+
+	var dX = x2 - x1;
+	var dY = y2 - y1;
+	var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
+	var dashX = dX / dashes;
+	var dashY = dY / dashes;
+
+	var q = 0;
+	while (q++ < dashes) {
+		x1 += dashX;
+		y1 += dashY;
+		this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+	}
+	this[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+}
+
+function createCross() {
+	var shape = new createjs.Shape();
+	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(0,0,stage.canvas.width,stage.canvas.height, 4);
+	stage.addChild(shape);
+
+	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
+	stage.addChild(shape);
 }
