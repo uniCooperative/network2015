@@ -629,3 +629,15 @@ function createCross() {
 	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
 	stage.addChild(shape);
 }
+
+// local p2p/ice failure
+webrtc.on('iceFailed', function (peer) {
+	alert("local ice failed");
+  console.log('local fail');
+});
+
+// remote p2p/ice failure
+ webrtc.on('connectivityError', function (peer) {
+	 alert("remote ice failed");
+         console.log('remote fail');
+                                 });
