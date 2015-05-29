@@ -1,5 +1,6 @@
-﻿\documentclass[11pt, a4paper, titlepage, block]{article}
+\documentclass[11pt, a4paper, titlepage, block]{article}
 \hyphenpenalty=10000
+\usepackage{graphicx}
 \begin{document}
 	\begin{titlepage}
 
@@ -99,7 +100,9 @@ una stanza (dove verra' svolta la partita)\\
 una rete (dove verranno segnati i gol)\\
 \\
 Ogni giocatore inviera' a ogni altro giocatore la posizione della propia racchetta.\\
-Il giocatore master, in possesso della pallina comunichera' a tutti gli altri giocatori la posizione della pallina.
+\\
+Il giocatore master, in possesso della pallina comunichera' a tutti gli altri giocatori la posizione della pallina.\\
+\\
 Ogni giocatore inviera' agli altri giocatori il numero di reti che ha subito.\\
 \\
 \\
@@ -107,26 +110,28 @@ Ogni stanza ospitera' una partita differente.\\
 Gli utenti "extra" potranno far da spettatori alla partita.\\
 
 \section{Scelte di Progetto}
-	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da google.
-
+	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da google.\\
+	\\
+	Abbiamo utilizzato la libbreria simpleWebRTC per creare un interfaccia unificata per ogni browser.\\
+	\\
+	Per poter creare piu' stanze ogni stanza a un url con una sua query finale per poter permettere piu' di una 	partita alla volta "room5251"\\ (https://unicooperative.github.io/network2015/?room5251)
+\newpage
 \section{Testing del Programma}
-	Screenshots:
+
+All inizio del gioco aspetto l arrico di 4 giocatori..\\\\
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture1.jpg}
 \\
 \\
-All inizio del gioco aspetto l arrico di 4 giocatori..
-\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture1.jpg}
+Una volta connessi i 4 giocatori il master invia agli altri giocatori la pallina..\\\\
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture2.jpg}
 \\
 \\
-Una volta connessi i 4 giocatori il master invia agli altri giocatori la pallina..
-\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture2.jpg}
+E i suoi relativi spostamenti.. \\\\
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture3.jpg}
 \\
 \\
-E i suoi relativi spostamenti..
-\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture3.jpg}
-\\
-\\
-Ogni giocatore invia i gol subiti agli altri giocatori..
-\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{../Screenshots/Capture4.jpg}
+Ogni giocatore invia i gol subiti agli altri giocatori..\\\\
+\includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture4.jpg}
 	\\	
 	\\
 
