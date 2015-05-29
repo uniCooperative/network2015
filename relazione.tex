@@ -1,0 +1,92 @@
+﻿\documentclass[11pt, a4paper, titlepage, block]{article}
+\usepackage{listings}
+\usepackage{graphicx}
+\hyphenpenalty=10000
+\usepackage[utf8]{inputenc}
+\usepackage{pdfpages}
+\begin{document}
+	\begin{titlepage}
+
+		\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+		\center % Center everything on the page
+
+		%----------------------------------------------------------------------------------------
+		%  HEADING SECTIONS
+		%----------------------------------------------------------------------------------------
+
+		\textsc{\LARGE Universit\`a di Urbino}\\[1.5cm] % Name of your university/college
+		\textsc{\Large Informatica Applicata}\\[0.5cm] % Major heading such as course name
+		\textsc{\large Programmazione Procedurale e Logica}\\[0.5cm] % Minor heading such as course title
+
+		%----------------------------------------------------------------------------------------
+		%  TITLE SECTION
+		%----------------------------------------------------------------------------------------
+
+
+		\HRule \\[0.4cm]
+		{ \huge \bfseries Relazione}\\[0.2cm] % Title of your document
+		\HRule \\[0.4cm]
+		\textsc{\large Progetto per la sessione invernale 2014/2015}
+		\\[2cm]
+		%----------------------------------------------------------------------------------------
+		%  AUTHOR SECTION
+		%----------------------------------------------------------------------------------------
+
+		\begin{minipage}{\textwidth}
+			\begin{flushleft}
+				\emph{Studente:}\\
+				Marco \textsc{Tamagno}\\ % Your name
+				matricola no: 261985
+				\\[1cm]
+				\emph{Studente:}\\
+				Julian \textsc{Sparber}\\ % Your name
+				matricola no: 260492\\
+			\end{flushleft}
+		\end{minipage}\\[3cm]
+
+		\begin{minipage}{\textwidth}
+			\begin{flushright}
+				\emph{Professore:} \\
+				 \textsc{Della Selva}\\ % Supervisor`s Name
+			\end{flushright}
+		\end{minipage}\\[4cm]
+
+		{\today}\\[1cm]
+
+
+		%----------------------------------------------------------------------------------------
+		%  DATE SECTION
+		%----------------------------------------------------------------------------------------
+
+	 % Date, change the \today to a set date if you want to be precise
+		%----------------------------------------------------------------------------------------
+		%  LOGO SECTION
+		%----------------------------------------------------------------------------------------
+		%\includegraphics{Logo}\\[1cm] % Include a department/university logo - this will require the graphicx package
+		%----------------------------------------------------------------------------------------
+		\newpage
+		\tableofcontents
+		\newpage
+
+	\end{titlepage}
+
+	\section{Specifica del Problema}
+Creare sfruttando webRTC una simulazione del gioco del pong a 4 giocatori dove gli utenti connessi tramite browser si scambino informazioni tramite peer to peer
+
+	\section{Analisi del Problema}
+WebRTC tramite un iceserver sfruttato per l autenticazione mette in una comunicazione peertopeer due o piu' browser.
+Il gioco del pong e' composto da questi elementi:
+una pallina
+una racchetta (una per ogni giocatore)
+una stanza (dove verra' svolta la partita)
+una rete (dove verranno segnati i gol)
+
+ogni giocatore inviera' a ogni altro giocatore la posizione della propia racchetta.
+il giocatore master, in possesso della pallina comunichera' a tutti gli altri giocatori la posizione della pallina
+ogni giocatore inviera' agli altri giocatori il numero di reti che ha subito.
+
+Ogni stanza ospitera' una partita differente.
+Gli utenti "extra" potranno far da spettatori alla partita.
+
+\end{document}

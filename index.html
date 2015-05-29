@@ -1,27 +1,15 @@
 <!DOCTYPE html>
 <html>
 	<head>
+		<link rel="stylesheet" type="text/css" href="style.css" />
 	</head>
-	<body>
+	<body onload="init();">
 		<div>Peers</div>
 		<div id="peers"></div>
-		<div>
-			<label>Username:</label>
-			<input onchange="updateUser()" id="username"></input>
-			<button onclick="updateUser()">OK</button>
-		</div>
-		<div id="nickname">
-			
-		</div>
-		
-		<!-- Rooms -->
-		<div>
-			<label>Room</label>
-		<div id="roomList"></div>
-			<input onchange="updateRoom()" id="room"></input>
-			<button onclick="updateRoom()">OK</button>
-		</div>
+		<canvas class="stage" id="demoCanvas" width="400" height="400"></canvas>
 		<script src="simplewebrtc.bundle.js"></script>
-		<script src="mainLobby.js"></script>
+		<script src="https://code.createjs.com/easeljs-0.8.0.min.js"></script>
+		<script src="https://code.createjs.com/tweenjs-0.6.0.min.js"></script>
+		<script src="main.js"></script>
 	</body>
 </html>
