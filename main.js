@@ -20,7 +20,7 @@ var webrtc = new SimpleWebRTC({
 	// dont ask for camera access
 	autoRequestMedia: false,
 	peerConnectionConfig:  {
-		iceServers: "stun.services.mozilla.com"
+		iceServers: {url: "stun.services.mozilla.com"}
 	},
 	// dont negotiate media
 	receiveMedia: {
