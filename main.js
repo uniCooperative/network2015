@@ -19,6 +19,7 @@ var webrtc = new SimpleWebRTC({
 	remoteVideosEl: '',
 	// dont ask for camera access
 	autoRequestMedia: false,
+	peerConnectionConfig: "stun:stun.services.mozilla.com",
 	// dont negotiate media
 	receiveMedia: {
 		mandatory: {
