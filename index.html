@@ -4,9 +4,15 @@
 		<link rel="stylesheet" type="text/css" href="style.css" />
 <script src="//api.turnservers.com/api.js?key=VSGWbtzxrGuFxnnRwoYnFdYdMZJcCObE"></script>
 		<script>
-			window.turnserversDotComAPI.iceServers(function(data) {
-				console.log(data);
-				iceServers = data;
+			window.turnserversDotComAPI.iceServers(function(ice) {
+				for(var i = 0; i < ice.length; i++) {
+					if (ice[i].credential){
+						var url = ice[i].url.split("@");
+						ice[i].username = url[0].split(":")[1]
+					}
+				}
+				console.log(ice);
+				iceServers = ice;
 			});
 		</script>
 	</head>
