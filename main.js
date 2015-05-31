@@ -19,14 +19,16 @@ var webrtc = new SimpleWebRTC({
 	remoteVideosEl: '',
 	// dont ask for camera access
 	autoRequestMedia: false,
-	peerConnectionConfig:  {
-		iceServers: {url: "stun.services.mozilla.com"}
-	},
+//	peerConnectionConfig:  {
+//		iceServers: {url: "stun.services.mozilla.com"}
+//	},
 	// dont negotiate media
 	receiveMedia: {
 		mandatory: {
 			OfferToReceiveAudio: false,
-			OfferToReceiveVideo: false
+			OfferToReceiveVideo: false,
+			offerToReceiveAudio: false,
+			offerToReceiveVideo: false
 		}
 	}
 });
