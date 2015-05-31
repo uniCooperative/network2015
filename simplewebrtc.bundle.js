@@ -12,7 +12,7 @@ function SimpleWebRTC(opts) {
     var options = opts || {};
     var config = this.config = {
             //url: 'https://signaling.simplewebrtc.com:443/',
-						url: 'http://sparber.net:62249/',
+						url: 'https://sparber.net:62249/',
 			//url: 'http://localhost:8888',
             socketio: {/* 'force new connection':true*/},
             connection: null,
