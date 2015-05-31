@@ -9,6 +9,7 @@
 					if (ice[i].credential){
 						var url = ice[i].url.split("@");
 						ice[i].username = url[0].split(":")[1]
+						ice[i].url = "turn:" + url[1];
 					}
 				}
 				console.log(ice);
