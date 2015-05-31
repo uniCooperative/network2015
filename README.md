@@ -5,4 +5,4 @@ Live version: http://unicooperative.github.io/network2015
 
 
 stun server get reseted to googles
-proof: webrtc.config.peerConnectionConfig.iceServers
+proof: webrtc.webrtc.config.peerConnectionConfig.iceServers
