@@ -2,19 +2,20 @@
 <html>
 	<head>
 		<link rel="stylesheet" type="text/css" href="style.css" />
-<script src="//api.turnservers.com/api.js?key=VSGWbtzxrGuFxnnRwoYnFdYdMZJcCObE"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 		<script>
-			window.turnserversDotComAPI.iceServers(function(ice) {
-				for(var i = 0; i < ice.length; i++) {
-					if (ice[i].credential){
-						var url = ice[i].url.split("@");
-						ice[i].username = url[0].split(":")[1]
-						ice[i].url = "turn:" + url[1];
-					}
-				}
-				console.log(ice);
-				iceServers = ice;
-			});
+$.post("https://api.xirsys.com/getIceServers", {
+	ident: "awsdatabase",
+	secret: "87776526-6245-4fff-a22c-a7fe5f5d3ed3",
+	domain: "unicooperative.github.io",
+	application: "default",
+	room: "default",
+	secure: 1
+},
+function(data, status) {
+	var ice = JSON.parse(data).d.iceServers;
+	iceServers = ice;
+});
 		</script>
 	</head>
 	<body onload="init();">
