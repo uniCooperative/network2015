@@ -166,13 +166,13 @@ function SimpleWebRTC(opts) {
 
     connection.on('stunservers', function (args) {
         // resets/overrides the config
-				console.log("My new turn server:", args);
+				console.log("My new iceServers:", args);
         self.webrtc.config.peerConnectionConfig.iceServers = args;
         self.emit('stunservers', args);
     });
     connection.on('turnservers', function (args) {
         // appends to the config
-				console.log("My new turn server:", args);
+				console.log("My new iceServers:", args);
         self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args);
         self.emit('turnservers', args);
     });
