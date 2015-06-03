@@ -20,9 +20,6 @@ var webrtc = new SimpleWebRTC({
   remoteVideosEl: '',
   // dont ask for camera access
   autoRequestMedia: false,
-  //	peerConnectionConfig:  {
-  //		iceServers: {url: "stun.services.mozilla.com"}
-  //	},
   // dont negotiate media
   receiveMedia: {
     mandatory: {
@@ -36,12 +33,21 @@ var webrtc = new SimpleWebRTC({
 
 //run after page load completed
 function init() {
-	state = "notReady";
-  players = [];
-	master = false;
+  // join without waiting for media
+  webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
+	//load sounds
   createjs.Sound.registerSound("sound/sonar.ogg", "soundPaddle");
   createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
   stage = new createjs.Stage("demoCanvas");
+	initGame();
+}
+
+function initGame() {
+	state = "notReady";
+  players = [];
+	playerCount = 0;
+	score = [0, 0, 0, 0];
+	master = false;
   var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
   textPlayerCount = new createjs.Text("1/4", "20px Arial", "#fff");
   text.x = stage.canvas.width / 2;
@@ -54,8 +60,6 @@ function init() {
   stage.addChild(text);
   stage.addChild(textPlayerCount);
   stage.update();
-  // join without waiting for media
-  webrtc.joinRoom(window.location.search.replace("?", "").split("&")[0] || createRoom());
 }
 
 
@@ -86,20 +90,19 @@ webrtc.on('createdPeer', function (peer) {
   peer.on('channelMessage', function (peer, channel, msg) {
     // check type, has to be json
     if(msg.type === "json"){
-      doStuff(peer, msg.payload);
+      handleMessage(peer, msg.payload);
     }
   });
 
-
   peer.on('channelOpen', function (channel, error) {
     if(isReadyToPlay()) {
-      initGame();
+      startHandshake();
     }
   });
   
   //check if channel is already open
    if(isReadyToPlay()) {
-      initGame();
+      startHandshake();
     }
 
   var allPeers = webrtc.webrtc.peers;
@@ -126,9 +129,20 @@ function isReadyToPlay() {
 
 function restartGame() {
 	if(state === "running") {
-  	init();
+		stopGame();
+  	initGame();
+  	var allPeers = webrtc.webrtc.peers;
+  	textPlayerCount.text = (allPeers.length + 1) + "/4";
+  	stage.update();
 	}
 }
+
+function stopGame() {
+	createjs.Ticker.removeAllEventListeners();
+	stage.removeAllChildren();
+	stage.update();
+}
+
 webrtc.on('joinedRoom', function (room) {
   console.log("Entered room " + room);
 });
@@ -150,7 +164,7 @@ function sendAll(data){
   }
 }
 
-function initGame(){
+function startHandshake(){
   console.log("Init Game");
 	state = "running";
   choosePositon();
@@ -186,7 +200,6 @@ function sortPlacePlayer(){
 }
 
 function putangle(){
-
   var positionX = 1;
   var positionY = 1;
 
@@ -232,7 +245,7 @@ function putAnglePosition(positionY,positionX){
   stage.addChild(shape[1]);
 }
 
-function doStuff(peer, data){
+function handleMessage(peer, data){
 	console.log("DoStuff: ", data);
   switch (data.job) {
     case "posInit":
