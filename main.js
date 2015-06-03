@@ -12,6 +12,7 @@ var ball;
 var textPlayerCount;
 var scoreText = [];
 var soundPaddle = "paddle";
+var state = "notReady";
 
 var webrtc = new SimpleWebRTC({
   // we don't do video
@@ -35,6 +36,9 @@ var webrtc = new SimpleWebRTC({
 
 //run after page load completed
 function init() {
+	state = "notReady";
+  players = [];
+	master = false;
   createjs.Sound.registerSound("sound/sonar.ogg", "soundPaddle");
   createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
   stage = new createjs.Stage("demoCanvas");
@@ -75,7 +79,7 @@ webrtc.on('createdPeer', function (peer) {
 
   peer.on('channelError', function (channel, error) {
     console.log("Data Channel error with peer: " + peer.id);
-    restartGame();
+   restartGame();
   });
 
   //handle incoming data
@@ -106,13 +110,14 @@ webrtc.on('createdPeer', function (peer) {
 function isReadyToPlay() {
   var allPeers = webrtc.webrtc.peers;
   var readyPlayers = 0;
-  if(allPeers.length === 3){
+  if(allPeers.length === 3 && state === "notReady"){
     for(var i = 0; i < allPeers.length; i++) {
      if (allPeers[i].channels.message.readyState === "open") {
        readyPlayers++;
      }
     }
     if(readyPlayers === 3) {
+			state = "ready";
       return true;
     }
   }
@@ -120,10 +125,9 @@ function isReadyToPlay() {
 }
 
 function restartGame() {
-  //init();
-   if(isReadyToPlay()) {
-      initGame();
-    }
+	if(state === "running") {
+  	init();
+	}
 }
 webrtc.on('joinedRoom', function (room) {
   console.log("Entered room " + room);
@@ -134,7 +138,7 @@ webrtc.on('joinedRoom', function (room) {
 function sendPeer(peer, data) {
   var isOpen = peer.sendDirectly("message", "json", data);
   if(!isOpen) {
-    console.log("Channel to peer: " + peer.id + "is closed");
+    console.log("Channel to peer: " + peer.id + "is not ready or open");
   }
 }
 
@@ -148,7 +152,7 @@ function sendAll(data){
 
 function initGame(){
   console.log("Init Game");
-  players = [];
+	state = "running";
   choosePositon();
 }
 
@@ -229,6 +233,7 @@ function putAnglePosition(positionY,positionX){
 }
 
 function doStuff(peer, data){
+	console.log("DoStuff: ", data);
   switch (data.job) {
     case "posInit":
       players.push({id: peer.id, rnd: data.rnd});
