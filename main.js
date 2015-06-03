@@ -239,7 +239,7 @@ function init() {
 	createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
 	stage = new createjs.Stage("demoCanvas");
 	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
-	textPlayerCount = new createjs.Text("0/4", "20px Arial", "#fff");
+	textPlayerCount = new createjs.Text("1/4", "20px Arial", "#fff");
 		text.x = stage.canvas.width / 2;
 		text.y = stage.canvas.height / 2;
 		text.textAlign = "center";
