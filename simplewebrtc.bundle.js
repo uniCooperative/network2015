@@ -11,7 +11,9 @@ function SimpleWebRTC(opts) {
     var self = this;
     var options = opts || {};
     var config = this.config = {
-            url: 'https://signaling.simplewebrtc.com:443/',
+            //url: 'https://signaling.simplewebrtc.com:443/',
+						url: 'https://sparber.net:62249/',
+			//url: 'http://localhost:8888',
             socketio: {/* 'force new connection':true*/},
             connection: null,
             debug: false,
@@ -164,11 +166,13 @@ function SimpleWebRTC(opts) {
 
     connection.on('stunservers', function (args) {
         // resets/overrides the config
+				console.log("My new iceServers:", args);
         self.webrtc.config.peerConnectionConfig.iceServers = args;
         self.emit('stunservers', args);
     });
     connection.on('turnservers', function (args) {
         // appends to the config
+				console.log("My new iceServers:", args);
         self.webrtc.config.peerConnectionConfig.iceServers = self.webrtc.config.peerConnectionConfig.iceServers.concat(args);
         self.emit('turnservers', args);
     });

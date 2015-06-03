@@ -19,11 +19,16 @@ var webrtc = new SimpleWebRTC({
 	remoteVideosEl: '',
 	// dont ask for camera access
 	autoRequestMedia: false,
+//	peerConnectionConfig:  {
+//		iceServers: {url: "stun.services.mozilla.com"}
+//	},
 	// dont negotiate media
 	receiveMedia: {
 		mandatory: {
 			OfferToReceiveAudio: false,
-			OfferToReceiveVideo: false
+			OfferToReceiveVideo: false,
+			offerToReceiveAudio: false,
+			offerToReceiveVideo: false
 		}
 	}
 });
@@ -234,7 +239,7 @@ function init() {
 	createjs.Sound.registerSound("sound/drip.ogg", "soundWall");
 	stage = new createjs.Stage("demoCanvas");
 	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
-	textPlayerCount = new createjs.Text("0/4", "20px Arial", "#fff");
+	textPlayerCount = new createjs.Text("1/4", "20px Arial", "#fff");
 		text.x = stage.canvas.width / 2;
 		text.y = stage.canvas.height / 2;
 		text.textAlign = "center";
@@ -629,3 +634,15 @@ function createCross() {
 	shape.graphics.setStrokeStyle(2).beginStroke("#fff").dashedLineTo(stage.canvas.width,0,0,stage.canvas.height, 4);
 	stage.addChild(shape);
 }
+
+// local p2p/ice failure
+webrtc.on('iceFailed', function (peer) {
+	alert("local ice failed");
+  console.log('local fail');
+});
+
+// remote p2p/ice failure
+ webrtc.on('connectivityError', function (peer) {
+	 alert("remote ice failed");
+         console.log('remote fail');
+                                 });
