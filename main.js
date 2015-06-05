@@ -1,14 +1,16 @@
 //constants
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
-var speed = 10;
+var SPEED = 10;
 
-var score = [0, 0, 0, 0];
-var players = [];
+//canvas elemetns
 var stage;
 var ball;
-var textPlayerCount;
 var scoreText = [];
+var textPlayerCount;
+
+
+var players = [];
 var state = "notReady";
 
 var webrtc = new SimpleWebRTC({
@@ -42,7 +44,6 @@ function init() {
 function initGame() {
 	state = "notReady";
 	players = [];
-	score = [0, 0, 0, 0];
 	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
 	textPlayerCount = new createjs.Text("1/4", "20px Arial", "#fff");
 	text.x = stage.canvas.width / 2;
@@ -168,7 +169,7 @@ function startHandshake(){
 function choosePositon(){
 	var rnd = Math.floor(Math.random() * 100) + 1;
 	var myId = webrtc.connection.getSessionid();
-	players.push({id: myId, rnd: rnd});
+	players.push({id: myId, rnd: rnd, score: 0});
 	sendAll({msg: "Hi, im Player " + rnd, job: "posInit", rnd: rnd});
 }
 
@@ -244,7 +245,7 @@ function handleMessage(peer, data){
 	console.log("DoStuff: ", data);
 	switch (data.job) {
 		case "posInit":
-			players.push({id: peer.id, rnd: data.rnd});
+			players.push({id: peer.id, rnd: data.rnd, score: 0});
 			if(players.length === 4) {
 				stage = new createjs.Stage("demoCanvas");
 				putangle();
@@ -262,7 +263,7 @@ function handleMessage(peer, data){
 			setBall(data.position);
 			break;
 		case "newScore":
-			setScore(data.score);
+			setScore(data.score.value, data.score.index);
 			break;
 		default:
 			console.log("Comand not found: ", data);
@@ -276,9 +277,8 @@ function setBall(pos) {
 	}
 }
 
-function setScore(score) {
-	for(var i = 0; i < 4; i++)
-		scoreText[i].text = score[i];
+function setScore(value, index) {
+		scoreText[index].text = value;
 }
 
 function startGame() {
@@ -395,9 +395,9 @@ function gameLoopMaster(event) {
 					var y = 4 * hitPos;
 					speedY = y;
 					if(speedX >= 0)
-						speedX = Math.sqrt((speed*speed) - (y*y))*-1;
+						speedX = Math.sqrt((SPEED*SPEED) - (y*y))*-1;
 					else {
-						speedX = Math.sqrt((speed*speed) - (y*y));
+						speedX = Math.sqrt((SPEED*SPEED) - (y*y));
 					}
 
 				}
@@ -408,9 +408,9 @@ function gameLoopMaster(event) {
 					speedX = x;
 					// where 25 (5*5) is resulting speed
 					if(speedY >= 0)
-						speedY = Math.sqrt((speed*speed) - (x*x))*-1;
+						speedY = Math.sqrt((SPEED*SPEED) - (x*x))*-1;
 					else {
-						speedY = Math.sqrt((speed*speed) - (x*x));
+						speedY = Math.sqrt((SPEED*SPEED) - (x*x));
 					}
 				}
 			}
@@ -424,33 +424,31 @@ function gameLoopMaster(event) {
 			}
 		}
 
-		var hitWall = false;
+		var hitWall;
 		//All 4 walls
 		if (ball.x + speedX > maxWidth ) {
-			score[2]++;
 			speedX *= -1;
-			hitWall = true;
+			hitWall = 2;
 		}
 		if (ball.x + speedX < 0 ) {
-			score[0]++;
 			speedX *= -1;
-			hitWall = true;
+			hitWall = 0;
 		}
 		if (ball.y + speedY > maxHeight ) {
-			score[1]++;
 			speedY *= -1;
-			hitWall = true;
+			hitWall = 1;
 		}
 		if (ball.y + speedY < 0 ) {
-			score[3]++;
 			speedY *= -1;
-			hitWall = true;
+			hitWall = 3;
 		}
 
-		if(hitWall) {
+		if(hitWall !== undefined) {
 			createjs.Sound.play("soundWall");
-			sendScore(score);
-			setScore(score);
+			players[hitWall].score++;
+			sendScore(players[hitWall].score, hitWall);
+			setScore(players[hitWall].score, hitWall);
+
 		}
 
 		ball.x += speedX;
@@ -467,8 +465,8 @@ function sendBallPosition(x, y) {
 	sendAll({msg: "", job: "setBall", position: {x: x, y: y}});
 }
 
-function sendScore(score) {
-	sendAll({msg: "", job: "newScore", score: score});
+function sendScore(value, index) {
+	sendAll({msg: "", job: "newScore", score: {value: value, index: index}});
 }
 
 function gameLoop(event) {
