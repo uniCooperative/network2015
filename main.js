@@ -1,17 +1,14 @@
+//constants
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
 var speed = 10;
-var speedX = -10;
-var speedY = 0;
+
 var score = [0, 0, 0, 0];
 var players = [];
-var playerCount = 0;
 var stage;
-var master = false;
 var ball;
 var textPlayerCount;
 var scoreText = [];
-var soundPaddle = "paddle";
 var state = "notReady";
 
 var webrtc = new SimpleWebRTC({
@@ -45,9 +42,7 @@ function init() {
 function initGame() {
 	state = "notReady";
 	players = [];
-	playerCount = 0;
 	score = [0, 0, 0, 0];
-	master = false;
 	var text = new createjs.Text("Waiting for players", "20px Arial", "#fff");
 	textPlayerCount = new createjs.Text("1/4", "20px Arial", "#fff");
 	text.x = stage.canvas.width / 2;
@@ -191,7 +186,7 @@ function sortPlacePlayer(){
 	//Place player
 	for(var i = 0; i < players.length; i++){
 		//add Paddle
-		players[i].element = addPlayer(players[i].id);
+		players[i].element = addPlayer(players[i].id, i);
 		players[i].vertical = (i % 2 == 0)? true: false;
 	}
 	//stage.update();
@@ -329,6 +324,8 @@ function addBall() {
 	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
 	ball.x = stage.canvas.width / 2;
 	ball.y = stage.canvas.height / 2;
+	ball.speedX = -10;
+	ball.speedY = 0;
 	//ball.snapToPixel = false;
 	stage.addChild(ball);
 	ball.checkCollision = function(a) {
@@ -368,7 +365,6 @@ function addScore(positionX,positionY) {
 }
 
 function addScorePosition(i,positionX,positionY){
-
 	scoreText[i] = new createjs.Text("0", "30px Arial", "#fff");
 
 	scoreText[i].x = positionX;
@@ -384,7 +380,8 @@ function gameLoopMaster(event) {
 		// Actions carried out when the Ticker is not paused.
 		var maxWidth = stage.canvas.width;
 		var maxHeight = stage.canvas.height;
-
+		var speedX = ball.speedX;
+		var speedY = ball.speedY;
 		//collision detection
 		for (var i = 0; i < stage.children.length && !collision; i++) {
 			//if(stage.children[i].playerId)
@@ -458,6 +455,8 @@ function gameLoopMaster(event) {
 
 		ball.x += speedX;
 		ball.y += speedY;
+		ball.speedX = speedX;
+		ball.speedY = speedY;
 		sendBallPosition(ball.x, ball.y);
 		stage.update();
 	}
@@ -495,39 +494,50 @@ function myPosition() {
 }
 
 function whoAmI(){
-	var id = webrtc.connection.getSessionid();
-	var Iam = new createjs.Shape();
-	var i =myPosition()
-		var tr_width = stage.canvas.width/16;
-	var tr_height = stage.canvas.height/16;
-	switch(i) {
-		case 0: Iam.graphics.beginStroke("white");
-						Iam.graphics.moveTo(stage.canvas.width/2-10,stage.canvas.height/2).lineTo(stage.canvas.width/2 - tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 - tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2-10,stage.canvas.height/2);
-						stage.addChild(Iam);
-						break;
-		case 1:	Iam.graphics.beginStroke("white");
-						Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2-10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 - tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2-10);
-						stage.addChild(Iam);
-						break;
-		case 2: Iam.graphics.beginStroke("white");
-						Iam.graphics.moveTo(stage.canvas.width/2+10,stage.canvas.height/2).lineTo(stage.canvas.width/2 + tr_width ,stage.canvas.height/2 + tr_height -10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2 + tr_width,stage.canvas.height/2 - tr_height+10).lineTo(stage.canvas.width/2+10,stage.canvas.height/2);
+	var triangle = new createjs.Shape();
+	var tr_width = stage.canvas.width / 16;
+	var tr_height = stage.canvas.height / 16;
+	var maxHalfWidth = stage.canvas.width / 2;
+	var maxHalfHeight = stage.canvas.height / 2;
 
-						stage.addChild(Iam);
-						break;
-		case 3: Iam.graphics.beginStroke("white");
-						Iam.graphics.moveTo(stage.canvas.width/2,stage.canvas.height/2+10).lineTo(stage.canvas.width/2 -tr_width+10 ,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2-10 + tr_width,stage.canvas.height/2 + tr_height).lineTo(stage.canvas.width/2,stage.canvas.height/2+10);
-						stage.addChild(Iam);
-						break;
+	triangle.graphics.beginFill("white").beginStroke("white");
+
+	switch(myPosition()) {
+		case 0: 
+			triangle.graphics.moveTo(maxHalfWidth - 10, maxHalfHeight)
+				.lineTo(maxHalfWidth - tr_width, maxHalfHeight + tr_height - 10)
+				.lineTo(maxHalfWidth - tr_width, maxHalfHeight - tr_height + 10)
+				.lineTo(maxHalfWidth - tr_width, maxHalfHeight - tr_height + 10)
+				.lineTo(maxHalfWidth - 10, maxHalfHeight);
+			break;
+		case 1:	
+			triangle.graphics.moveTo(maxHalfWidth, maxHalfHeight - 10)
+				.lineTo(maxHalfWidth - tr_width + 10, maxHalfHeight - tr_height)
+				.lineTo(maxHalfWidth - 10 + tr_width, maxHalfHeight - tr_height)
+				.lineTo(maxHalfWidth - 10 + tr_width, maxHalfHeight - tr_height)
+				.lineTo(maxHalfWidth, maxHalfHeight - 10);
+			break;
+		case 2: 
+			triangle.graphics.moveTo(maxHalfWidth + 10, maxHalfHeight)
+				.lineTo(maxHalfWidth + tr_width, maxHalfHeight + tr_height - 10)
+				.lineTo(maxHalfWidth + tr_width, maxHalfHeight - tr_height + 10)
+				.lineTo(maxHalfWidth + tr_width, maxHalfHeight - tr_height + 10)
+				.lineTo(maxHalfWidth + 10, maxHalfHeight);
+			break;
+		case 3: 
+			triangle.graphics.moveTo(maxHalfWidth, maxHalfHeight + 10)
+				.lineTo(maxHalfWidth - tr_width+10, maxHalfHeight + tr_height)
+				.lineTo(maxHalfWidth - 10 + tr_width, maxHalfHeight + tr_height)
+				.lineTo(maxHalfWidth - 10 + tr_width, maxHalfHeight + tr_height)
+				.lineTo(maxHalfWidth, maxHalfHeight + 10);
+			break;
 	}
-	//my position
-
-
-
+	stage.addChild(triangle);
 }
 
-function addPlayer(id) {
-	player = new createjs.Shape();
-	var pos = findNextPostion();
+function addPlayer(id, positionIndex) {
+	var player = new createjs.Shape();
+	var pos = findNextPostion(positionIndex);
 	if (pos) {
 		if (pos.vertical === true) {
 			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -PADDLE_HEIGHT/2, PADDLE_LENGHT, PADDLE_HEIGHT);
@@ -550,10 +560,8 @@ function addPlayer(id) {
 }
 
 
-function findNextPostion() {
-	var nextPos = playerCount;
+function findNextPostion(nextPos) {
 	if (nextPos < 4) {
-		playerCount++;
 		var x, y;
 		var width = stage.canvas.width;
 		var height = stage.canvas.height;
