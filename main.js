@@ -537,7 +537,7 @@ function whoAmI(){
 
 function addPlayer(id, positionIndex) {
 	var player = new createjs.Shape();
-	var pos = findNextPostion(positionIndex);
+	var pos = findNextPosition(positionIndex);
 	if (pos) {
 		if (pos.vertical === true) {
 			player.graphics.beginFill("White").drawRect(-(PADDLE_LENGHT/2), -PADDLE_HEIGHT/2, PADDLE_LENGHT, PADDLE_HEIGHT);
@@ -560,7 +560,7 @@ function addPlayer(id, positionIndex) {
 }
 
 
-function findNextPostion(nextPos) {
+function findNextPosition(nextPos) {
 	if (nextPos < 4) {
 		var x, y;
 		var width = stage.canvas.width;
