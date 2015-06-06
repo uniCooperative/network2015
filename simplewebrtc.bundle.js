@@ -2353,7 +2353,6 @@ var io = ('undefined' === typeof module ? {} : module.exports);
       }
     };
 
-		console.log("Add Handshake ulr");
     var url = [
           'http' + (options.secure ? 's' : '') + ':/'
         , options.host + ':' + options.port
