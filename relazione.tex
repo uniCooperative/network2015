@@ -1,4 +1,4 @@
-\documentclass[11pt, a4paper, titlepage, block]{article}
+﻿\documentclass[11pt, a4paper, titlepage, block]{article}
 \hyphenpenalty=10000
 \usepackage{graphicx}
 \begin{document}
@@ -14,7 +14,7 @@
 
 		\textsc{\LARGE Universit\`a di Urbino}\\[1.5cm] % Name of your university/college
 		\textsc{\Large Informatica Applicata}\\[0.5cm] % Major heading such as course name
-		\textsc{\large Programmazione Procedurale e Logica}\\[0.5cm] % Minor heading such as course title
+		\textsc{\large Reti di calcolatori}\\[0.5cm] % Minor heading such as course title
 
 		%----------------------------------------------------------------------------------------
 		%  TITLE SECTION
@@ -24,7 +24,7 @@
 		\HRule \\[0.4cm]
 		{ \huge \bfseries Relazione}\\[0.2cm] % Title of your document
 		\HRule \\[0.4cm]
-		\textsc{\large Progetto per la sessione invernale 2014/2015}
+		\textsc{\large Progetto per la sessione estiva 2015/2016}
 		\\[2cm]
 		%----------------------------------------------------------------------------------------
 		%  AUTHOR SECTION
@@ -38,7 +38,7 @@
 				\\[1cm]
 				\emph{Studente:}\\
 				Julian \textsc{Sparber}\\ % Your name
-				matricola no: 260492\\
+				matricola no: 260324\\
 			\end{flushleft}
 		\end{minipage}\\[3cm]
 
@@ -92,7 +92,7 @@ STUN non lavora con il quarto tipo di NAT, detto simmetrico o bidirezionale, que
 Client e server STUN sono utilizzati con protocolli come SIP tramite UDP per il trasferimento di traffico voce/video/testo su Internet.\\
 \\
 
-WebRTC tramite un iceserver sfruttato per l autenticazione mette in una comunicazione peertopeer due o piu' browser.\\
+WebRTC tramite un iceserver sfruttato per l autenticazione mette in una comunicazione peer to peer due o piu' browser.\\
 Il gioco del pong e' composto da questi elementi:\\
 una pallina\\
 una racchetta (una per ogni giocatore)\\
@@ -110,15 +110,78 @@ Ogni stanza ospitera' una partita differente.\\
 Gli utenti "extra" potranno far da spettatori alla partita.\\
 
 \section{Scelte di Progetto}
-	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da google.\\
+  Se non e' disponibile una connessione diretta peer to peer allora ci appoggeremo a un turn server.
 	\\
-	Abbiamo utilizzato la libbreria simpleWebRTC per creare un interfaccia unificata per ogni browser.\\
+	Abbiamo deciso di non usufruire di trasferimenti audio/video tra i peer
 	\\
-	Per poter creare piu' stanze ogni stanza a un url con una sua query finale per poter permettere piu' di una 	partita alla volta "room5251"\\ (https://unicooperative.github.io/network2015/?room5251)
+	\\
+	var webrtc = new SimpleWebRTC({
+		// we don't do video
+		localVideoEl: '',
+		remoteVideosEl: '',
+		// dont ask for camera access
+		autoRequestMedia: false,
+		// dont negotiate media
+		receiveMedia: {
+			mandatory: {
+				OfferToReceiveAudio: false,
+				OfferToReceiveVideo: false,
+				offerToReceiveAudio: false,
+				offerToReceiveVideo: false
+			}
+		}
+	});
+	\\
+  \\
+	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da xirsys, che nell offerta gratuita ci mette a disposizione 10 connessioni possibili al turn server e 100 MB di traffico mensili.\\
+	\\
+	Abbiamo utilizzato la libbreria simpleWebRTC per creare un interfaccia unificata per ogni browser compatibile a webRTC.\\
+	\\
+  Abbiamo utilizzato un signal server per stabilire la connessione iniziale, per semplicita' abbiamo utilizzato il SignalMaster compatibile con la libreria SimpleWebRTC.
+	\\
+ 	Modificando il signalMaster abbiamo fatto in modo che questo distribuisse le credenziali d'accesso al turn server ai vari peer le quali sono prima richieste al server di xirsys.
+	\\
+	Per poter creare piu' stanze ogni stanza ha un url con una sua query finale per poter permettere piu' di una partita alla volta "room5251"\\ (https://unicooperative.github.io/network2015/?room5251)
+	\\
+	\\
+	function createRoom() {
+		var room = "room" + parseInt(Math.random()*10000);
+		if (history.pushState) {
+			var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + room;
+			window.history.pushState({path:newurl},'',newurl);
+		}
+		return room;
+	}
+	\\
+	\\
+	La partita puo' iniziare solo quando sono arrivati tutti e 4 i giocatori..
+	\\
+	\\
+	function isReadyToPlay() {
+		var allPeers = webrtc.webrtc.peers;
+		var readyPlayers = 0;
+		if(allPeers.length === 3 && state === "notReady"){
+			for(var i = 0; i < allPeers.length; i++) {
+				if (allPeers[i].channels.message.readyState === "open") {
+					readyPlayers++;
+				}
+			}
+			if(readyPlayers === 3) {
+				state = "ready";
+				return true;
+			}
+		}
+		return false;
+	}
+	\\
+	\\
+	Per semplicita' possiamo ospitare un massimo di 10 connessioni al turn server.
+	\\
+
 \newpage
 \section{Testing del Programma}
 
-All inizio del gioco aspetto l arrico di 4 giocatori..\\\\
+All inizio del gioco aspetto l arrivo di 4 giocatori..\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture1.jpg}
 \\
 \\
@@ -132,7 +195,7 @@ E i suoi relativi spostamenti.. \\\\
 \\
 Ogni giocatore invia i gol subiti agli altri giocatori..\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture4.jpg}
-	\\	
+	\\
 	\\
 
 \end{document}
