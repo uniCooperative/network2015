@@ -1,6 +1,8 @@
-﻿\documentclass[11pt, a4paper, titlepage, block]{article}
+\documentclass[11pt, a4paper, titlepage, block]{article}
 \hyphenpenalty=10000
 \usepackage{graphicx}
+\usepackage{listings}
+\lstset{tabsize=2, escapechar=$}
 \begin{document}
 	\begin{titlepage}
 
@@ -45,7 +47,7 @@
 		\begin{minipage}{\textwidth}
 			\begin{flushright}
 				\emph{Professore:} \\
-				 Antonio\textsc{Della Selva}\\ % Supervisor`s Name
+				 Antonio \textsc{Della Selva}\\ % Supervisor`s Name
 			\end{flushright}
 		\end{minipage}\\[4cm]
 
@@ -64,138 +66,154 @@
 		%----------------------------------------------------------------------------------------
 		\newpage
 		\tableofcontents
-		\newpage
+		
 
 	\end{titlepage}
 
 	\section{Specifica del Problema}
-Creare sfruttando webRTC una simulazione del gioco del pong a 4 giocatori dove gli utenti connessi tramite browser si scambino informazioni tramite peer to peer
-
+Creare sfruttando il protocollo WebRTC un gioco che prenda spunto al gioco del pong, ma nel quale 4 giocatori possano sfidarsi tra loro. Gli utenti connessi tramite browser si dovranno scambiare informazioni tramite il protocollo.
+\newpage
 	\section{Analisi del Problema}
-
-WebRTC è una tecnologia open source nata il 1º giugno 2011 che consente ai browser di effettuare in tempo reale la videochat. È basata su HTML5 e JavaScript.\\
-La sua inclusione nel World Wide Web Consortium (W3C) standard è supportato da Google, Mozilla e Opera.\\
-È rilasciato sotto la parziale licenza BSD e il codice si basa su prodotti di Global IP Solutions, azienda che Google ha acquisito nel maggio 2010 per 68 milioni di euro.\\
-WebRTC utilizza per l'audio il codec Opus e il codec VP8 per il video e si sta lavorando a migrare il plugin di Google Talk video chat per il quadro webRTC.
+     \subsection{WebRTC}
+     WebRTC (Web Real-Time Communication) \`e un API standard creato dal World Wide Web Consortium (W3C) che    supporta  applicazioni browser-to-browser per chiamate, videochiamate, e P2P file sharing senza il bisogno di programmi esterni.\\
+    
+	\subsection{Interactive Connectivity Establishment (ICE)}
+L'ICE viene sfruttato nelle connessioni browser to browser per stabilire una connessione tra due peer. \\
 \\
-STUN è l'acronimo di Session Traversal Utilities for Network Address Translators (NATs): si tratta di un protocollo e di un insieme di funzioni che permettono alle applicazioni in esecuzione su un computer di scoprire la presenza ed i tipi di NAT e firewall che si interpongono tra il computer e la rete pubblica.\\
+STUN \`e l'acronimo di Session Traversal Utilities for NAT (Network Address Translation): si tratta di un protocollo e di un insieme di funzioni che permettono alle applicazioni in esecuzione su un computer di scoprire la presenza ed i tipi di NAT e firewall che si interpongono tra il computer e la rete pubblica.\\
+\\
 STUN permette a queste applicazioni di conoscere gli indirizzi IP e le porte con cui il dispositivo NAT li sta rendendo visibili sulla rete pubblica. STUN opera con molti NAT preesistenti e non richiede particolari comportamenti da essi.\\
-Come risultato, STUN assicura ad una grande varietà di applicazioni IP (ad esempio, i telefoni VoIP) di lavorare attraverso le varie strutture NAT preesistenti.
-
-Nella specifica originaria in RFC 3489, STUN era l'acronimo di Simple Traversal of User Datagram Protocol (UDP) Through Network Address Translators (NATs), ma nella specifica aggiornata pubblicata come RFC 5389 il titolo è mutato in Session Traversal Utilities for NAT, mantenendo lo stesso acronimo.\\
-
-STUN è un protocollo client-server. Un telefono o un software VoIP può includere un client STUN, che invierà una richiesta ad un server STUN. Il server riporterà al client STUN l'indirizzo IP pubblico e la porta UDP che il dispositivo NAT (es. router) sta associando al client per il traffico entrante nella rete.\\
-Le risposte permettono anche al client STUN di determinare che tipo di NAT è in uso.\\
-Ci sono tre tipi di NAT che è possibile attraversare tramite STUN: Full Cone, Restricted Cone e Port Restricted Cone.\\
+\\
+Come risultato, STUN assicura ad una grande variet\`a di applicazioni IP (ad esempio, i telefoni VoIP) di lavorare attraverso le varie strutture NAT preesistenti.\\
+\\
+Nella specifica originaria in RFC 3489, STUN era l'acronimo di Simple Traversal of User Datagram Protocol (UDP) Through Network Address Translators (NATs), ma nella specifica aggiornata pubblicata come RFC 5389 il titolo \`e mutato in Session Traversal Utilities for NAT, mantenendo lo stesso acronimo.\\
+\\
+STUN \`e un protocollo client-server. Un telefono o un software VoIP pu\`o includere un client STUN, che invier\`a una richiesta ad un server STUN. Il server riporter\`a al client STUN l'indirizzo IP pubblico e la porta UDP che il dispositivo NAT (es. router) sta associando al client per il traffico entrante nella rete.\\
+Le risposte permettono anche al client STUN di determinare che tipo di NAT \`e in uso.\\
+Ci sono tre tipi di NAT che \`e possibile attraversare tramite STUN: Full Cone, Restricted Cone e Port Restricted Cone.\\
+\\
 STUN non lavora con il quarto tipo di NAT, detto simmetrico o bidirezionale, questo a causa del fatto che i dati trovati dal server STUN non saranno validi per terze parti, in quanto il NAT bidirezionale non permette a terzi di riusare IP e porte abilitate, differenziando le associazioni a seconda dell'host contattato.\\
-
-Client e server STUN sono utilizzati con protocolli come SIP tramite UDP per il trasferimento di traffico voce/video/testo su Internet.\\
-\\
-
-WebRTC tramite un iceserver sfruttato per l autenticazione mette in una comunicazione peer to peer due o piu' browser.\\
-Il gioco del pong e' composto da questi elementi:\\
-una pallina\\
-una racchetta (una per ogni giocatore)\\
-una stanza (dove verra' svolta la partita)\\
-una rete (dove verranno segnati i gol)\\
-\\
-Ogni giocatore inviera' a ogni altro giocatore la posizione della propia racchetta.\\
-\\
-Il giocatore master, in possesso della pallina comunichera' a tutti gli altri giocatori la posizione della pallina.\\
-\\
-Ogni giocatore inviera' agli altri giocatori il numero di reti che ha subito.\\
-\\
-\\
-Ogni stanza ospitera' una partita differente.\\
-Gli utenti "extra" potranno far da spettatori alla partita.\\
-
-\section{Scelte di Progetto}
-  Se non e' disponibile una connessione diretta peer to peer allora ci appoggeremo a un turn server.
-	\\
-	Abbiamo deciso di non usufruire di trasferimenti audio/video tra i peer
-	\\
-	\\
-	var webrtc = new SimpleWebRTC({
-		// we don't do video
-		localVideoEl: '',
-		remoteVideosEl: '',
-		// dont ask for camera access
-		autoRequestMedia: false,
-		// dont negotiate media
-		receiveMedia: {
-			mandatory: {
-				OfferToReceiveAudio: false,
-				OfferToReceiveVideo: false,
-				offerToReceiveAudio: false,
-				offerToReceiveVideo: false
-			}
-		}
-	});
-	\\
-  \\
-	Abbiamo deciso di utilizzare lo stun/turn server reso disponibile da xirsys, che nell offerta gratuita ci mette a disposizione 10 connessioni possibili al turn server e 100 MB di traffico mensili.\\
-	\\
-	Abbiamo utilizzato la libbreria simpleWebRTC per creare un interfaccia unificata per ogni browser compatibile a webRTC.\\
-	\\
-  Abbiamo utilizzato un signal server per stabilire la connessione iniziale, per semplicita' abbiamo utilizzato il SignalMaster compatibile con la libreria SimpleWebRTC.
-	\\
- 	Modificando il signalMaster abbiamo fatto in modo che questo distribuisse le credenziali d'accesso al turn server ai vari peer le quali sono prima richieste al server di xirsys.
-	\\
-	Per poter creare piu' stanze ogni stanza ha un url con una sua query finale per poter permettere piu' di una partita alla volta "room5251"\\ (https://unicooperative.github.io/network2015/?room5251)
-	\\
-	\\
-	function createRoom() {
-		var room = "room" + parseInt(Math.random()*10000);
-		if (history.pushState) {
-			var newurl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?' + room;
-			window.history.pushState({path:newurl},'',newurl);
-		}
-		return room;
-	}
-	\\
-	\\
-	La partita puo' iniziare solo quando sono arrivati tutti e 4 i giocatori..
-	\\
-	\\
-	function isReadyToPlay() {
-		var allPeers = webrtc.webrtc.peers;
-		var readyPlayers = 0;
-		if(allPeers.length === 3 && state === "notReady"){
-			for(var i = 0; i < allPeers.length; i++) {
-				if (allPeers[i].channels.message.readyState === "open") {
-					readyPlayers++;
-				}
-			}
-			if(readyPlayers === 3) {
-				state = "ready";
-				return true;
-			}
-		}
-		return false;
-	}
-	\\
-	\\
-	Per semplicita' possiamo ospitare un massimo di 10 connessioni al turn server.
-	\\
+Se a causa del NAT non \`e possibile creare una connessione peer to peer allora la connessione si appogger\`a a un TURN server.\\
 
 \newpage
-\section{Testing del Programma}
+	\subsection{Il gioco}
+		\subsubsection{Elementi}
+Il gioco sar\`a composto da questi elementi:\\
+una pallina\\
+una racchetta (una per ogni giocatore)\\
+una stanza (dove verr\`a svolta la partita)\\
+una rete (dove verranno segnati i gol)\\
+\\
+		\subsubsection{Gameplay}
+Ogni giocatore invier\`a a ogni altro giocatore la posizione della propia racchetta.\\
+\\
+Il giocatore master, in possesso della pallina comunicher\`a a tutti gli altri giocatori la posizione della pallina.\\
+\\
+Il master invier\`a agli altri giocatori il numero di reti che hanno subito subito.\\
+\\
+Il master controller\`a l'avvenimento di collisioni della pallina contro qualsiasi oggetto del campo, e ne comunicher\`a l'avvenuta collisione agli altri giocatori.\\
+\\
+Quando la pallina sar\`a soggetto di una collisione verr\`a riprodotto un suono, differente a seconda di che cosa \`e stato colpito.
+\\
+Ogni stanza ospiter\`a una partita differente la quale sar\`a identificata tramite un id.\\
+\newpage
+\section{Scelte di Progetto}
+	\subsubsection{SimpleWebRTC}
+	Abbiamo deciso di utilzzare la libreria SimpleWebRTC perch\`e crea un interfaccia semplice e unificata per   
+	ogni browser compatibile a webRTC.\\
+	La libreria permette di accedere al microfono e alla webcam dell'utente, ma per il nostro gioco
+	non ne necessitiamo, per cui disattiveremo la richiesta a essi e il trasferimento del video e dell'audio.
 
-All inizio del gioco aspetto l arrivo di 4 giocatori..\\\\
+	\begin{lstlisting}
+var webrtc = new SimpleWebRTC({
+	// we don't do video
+	localVideoEl: '',
+	remoteVideosEl: '',
+	// don't ask for camera access
+	autoRequestMedia: false,
+	// don't negotiate media
+	receiveMedia: {
+		mandatory: {
+			offerToReceiveAudio: false,
+			offerToReceiveVideo: false
+		}
+	},
+	// our own signalserver
+	url: 'https://sparber.net:62249/'
+});
+\end{lstlisting}
+	La libreria SimpleWebRTC utilizza per creare le stanze e inizializzare la connessione tra i peer un signal 
+	server.
+	Abbiamo scelto come signal server Signalmaster compatibile con la libreria SimpleWebRTC, il quale abbiamo  	
+	installato e configurato sul server sparber.net\\
+	\\
+	A causa dell impossibilit\`a di installare uno STUN/TURN server sul server sparber.net, 
+	abbiamo deciso di utilizzarne uno reso disponibile da xirsys.com, che nell offerta gratuita
+	ci mette a disposizione 10 connessioni possibili al TURN server e 100 MB di traffico mensili, 
+	caratteristiche che per una dimostrazione della funzionalit\`a del gioco sono sufficenti.\\
+	\\
+	Modificando il Signalmaster abbiamo fatto in modo che questo distribuisse le credenziali d'accesso al 
+	turn server ai vari peer, le quali sono prima state richieste al server di xirsys.com.\\
+	\newpage
+	\subsubsection{Stanze}
+	Per poter creare pi\'u stanze ogni stanza ha un url con una sua query,\\ ad esempio: \\ https://unicooperative.github.io/network2015/?room5251\\
+	\\
+	Questo sistema permette di poter giocare a pi\'u partite alla volta.
+	Per giocare nella stessa stanza basta mettere la stessa query nella url.
+	Un url privo di query avr\`a assegnato un id casuale, ad esempio "room5251"\\ 
+	\begin{lstlisting}
+var room = "room" + parseInt(Math.random()*10000);
+if (history.pushState) {
+	var newurl = window.location.protocol +
+		"//" +
+		window.location.host +
+		window.location.pathname +
+		'?' +
+		room;
+		window.history.pushState({path:newurl},'',newurl);
+	}
+\end{lstlisting}
+\newpage
+\subsubsection{Gameplay}
+	La partita puo' iniziare solo quando sono arrivati tutti e 4 i giocatori..
+
+	\begin{lstlisting}
+function isReadyToPlay() {
+	var allPeers = webrtc.webrtc.peers;
+	var readyPlayers = 0;
+	if(allPeers.length === 3 && state === "notReady"){
+		for(var i = 0; i < allPeers.length; i++) {
+			if (allPeers[i].channels.message.readyState === "open") {
+				readyPlayers++;
+			}
+		}
+		if(readyPlayers === 3) {
+			state = "ready";
+			return true;
+		}
+	}
+	return false;
+}
+\end{lstlisting}
+\newpage
+\section{Demo dell'Applicazione}
+
+All inizio del gioco il giocatore aspetta l'arrivo di 3 giocatori.\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture1.jpg}
 \\
 \\
-Una volta connessi i 4 giocatori il master invia agli altri giocatori la pallina..\\\\
+\\
+Una volta connessi i 4 giocatori il master invia agli altri giocatori la pallina.\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture2.jpg}
-\\
-\\
-E i suoi relativi spostamenti.. \\\\
+\newpage
+E i suoi relativi spostamenti.\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture3.jpg}
 \\
 \\
-Ogni giocatore invia i gol subiti agli altri giocatori..\\\\
+\\
+Ogni giocatore invia i gol subiti agli altri giocatori.\\\\
 \includegraphics[width=3in,height=3in,viewport=0 0 300 300]{./Screenshots/Capture4.jpg}
-	\\
-	\\
-
+\\
+\\
+Se volete testare il gioco \`e reso disponibile all'url: \\https://unicooperative.github.io/network2015/?room5251
 \end{document}

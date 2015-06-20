@@ -1,6 +1,7 @@
 //constants
 var PADDLE_LENGHT = 100;
 var PADDLE_HEIGHT = 6;
+var PADDLE_SPEED = 5;
 var SPEED = 10;
 
 //canvas elemetns
@@ -324,7 +325,7 @@ function addBall() {
 	ball.graphics.beginFill("White").drawRect(-5,-5,10,10);
 	ball.x = stage.canvas.width / 2;
 	ball.y = stage.canvas.height / 2;
-	ball.speedX = -10;
+	ball.speedX = -SPEED;
 	ball.speedY = 0;
 	//ball.snapToPixel = false;
 	stage.addChild(ball);
@@ -391,7 +392,7 @@ function gameLoopMaster(event) {
 				createjs.Sound.play("soundPaddle");
 				if(paddle.vertical) {
 					//value of intresst ball.y
-					var hitPos = (ball.y - paddle.y)/50;
+					var hitPos = (ball.y - paddle.y)/25;
 					var y = 4 * hitPos;
 					speedY = y;
 					if(speedX >= 0)
@@ -403,7 +404,7 @@ function gameLoopMaster(event) {
 				}
 				else {
 					//value of intresst ball.x
-					var hitPos = (ball.x - paddle.x)/50
+					var hitPos = (ball.x - paddle.x)/25;
 						var x = 4 * hitPos;
 					speedX = x;
 					// where 25 (5*5) is resulting speed
@@ -586,10 +587,10 @@ function movePaddle(peerId, direction){
 	var peer = findPaddleToMove(peerId);
 	switch (direction){
 		case "up":
-			step = -2;
+			step = -PADDLE_SPEED;
 			break;
 		case "down":
-			step = 2;
+			step = PADDLE_SPEED;
 			break;
 	}
 
